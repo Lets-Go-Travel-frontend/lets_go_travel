@@ -71,7 +71,7 @@ export default function Finder() {
           }}
         >
           <Tab
-            label="Offertas"
+            label="Ofertas"
             icon={<Image src="/images/icons/icon ofertas.png" width={50} height={50} alt="" />}
             iconPosition="top"
             {...a11yProps(0)}

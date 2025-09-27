@@ -1,11 +1,31 @@
-import { Divider, Stack } from "@mui/material";
+"use client";
+
+import { useState, useRef } from "react";
+import { Close } from "@mui/icons-material"; 
+
+import { Divider, Stack, Popover, IconButton } from "@mui/material";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import HeadsetMicRoundedIcon from "@mui/icons-material/HeadsetMicRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquareInstagram, faTiktok } from "@fortawesome/free-brands-svg-icons";
+import LoginPopover from "../LoginPopover/LoginPopover";
 
 export default function HeaderTopBar() {
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleOpenLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseLogin = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
   return (
     <>
       <Stack
@@ -32,9 +52,13 @@ export default function HeaderTopBar() {
           </a>
         </div>
         <Stack direction="row" spacing={2} className="items-center text-blue-900">
-          <a href="#" className="flex-center">
-            Personas/Iniciar Sesión
-          </a>
+          <button 
+          ref={buttonRef}
+          onClick={handleOpenLogin}
+          className="flex-center hover:underline cursor-pointer"
+          >
+            Registro/Iniciar Sesión
+          </button>
           <AccountCircleRoundedIcon fontSize="large"></AccountCircleRoundedIcon>
         </Stack>
       </Stack>
@@ -53,6 +77,13 @@ export default function HeaderTopBar() {
           <FontAwesomeIcon icon={faTiktok} className="text-primary text-3xl" />
         </a>
       </Stack>
+
+      <LoginPopover 
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleCloseLogin}
+      />
+
     </>
   );
 }

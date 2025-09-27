@@ -16,6 +16,7 @@ export default function Home() {
   const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  
   return (
     <>
       <Header />
