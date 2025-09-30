@@ -19,6 +19,13 @@ export default function HeaderNav() {
         <div>
           <button className="text-white px-4 py-2 rounded-md">Agencias / B2B</button>
         </div>
+
+        <div className="flex gap-4">
+          <a href="/hoteles" className="text-white px-4 py-2 rounded-md hover:bg-orange-600">
+            Hoteles
+          </a>
+          <button className="text-white px-4 py-2 rounded-md">Agencias / B2B</button>
+        </div>
       </Stack>
     </nav>
   );
