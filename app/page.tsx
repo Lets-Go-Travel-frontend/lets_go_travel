@@ -11,6 +11,7 @@ import Finder from "./components/Finder/Finder";
 import Image from "next/image";
 import { OfertasSearchResults } from "./components/Ofertas";
 import { PaquetesSearchResults } from "./components/Paquetes";
+import { DestinosSearchResults } from "./components/Destinos";
 
 export default function Home() {
   const [value, setValue] = useState(0);
@@ -27,6 +28,9 @@ export default function Home() {
       
       case 1: // Tab "Paquetes"
         return <PaquetesSearchResults />;
+      
+      case 2: // Tab "Destinos"
+        return <DestinosSearchResults />;
       
       default:
         // Contenido original para otros tabs
