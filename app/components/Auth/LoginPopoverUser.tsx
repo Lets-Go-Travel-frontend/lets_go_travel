@@ -1,17 +1,26 @@
 "use client";
 
-import { Popover, Typography, IconButton } from "@mui/material";
+import { Popover, IconButton } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import AgencyRegistrationForm from "./AgencyRegistrationForm";
+import LoginForm from "./LoginForm";
 import { useEffect, useRef } from "react";
 
-interface LoginPopoverProps {
+interface LoginPopoverUserProps {
   open: boolean;
   anchorEl: HTMLElement | null;
   onClose: () => void;
+  onSwitchToRegister: () => void;
+  onSwitchToAgency: () => void;
 }
 
-export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverProps) {
+export default function LoginPopoverUser({ 
+  open, 
+  anchorEl, 
+  onClose, 
+  onSwitchToAgency,
+  onSwitchToRegister 
+}: LoginPopoverUserProps) {
+
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,7 +47,7 @@ export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverPr
     <Popover
       open={open}
       anchorEl={anchorEl}
-      onClose={onClose} 
+      onClose={onClose}
       anchorOrigin={{
         vertical: 'bottom',
         horizontal: 'right',
@@ -55,25 +64,17 @@ export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverPr
             width: 'fit-content',
             display: 'inline-block',
             position: 'relative',
-            maxWidth: '600px',
+            maxWidth: '400px',
           }
         }
       }}
     >
-      <div ref={popoverRef} className="p-6 relative">
-        <IconButton
-          onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-          size="small"
-        >
-          <Close fontSize="small" />
-        </IconButton>
-        
-        <Typography variant="h6" className="text-blue-900 font-bold mb-4 pr-8">
-          Registro de Agencia
-        </Typography>
-        
-        <AgencyRegistrationForm onClose={onClose} />
+      <div ref={popoverRef} className="p-6">
+        <LoginForm 
+            onClose={onClose}
+            onSwitchToRegister={onSwitchToRegister} 
+            onSwitchToAgency={onSwitchToAgency}
+        />
       </div>
     </Popover>
   );

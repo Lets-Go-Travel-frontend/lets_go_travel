@@ -1,30 +1,72 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Close } from "@mui/icons-material"; 
-
-import { Divider, Stack, Popover, IconButton } from "@mui/material";
+import { Divider, Stack } from "@mui/material";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import HeadsetMicRoundedIcon from "@mui/icons-material/HeadsetMicRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquareInstagram, faTiktok } from "@fortawesome/free-brands-svg-icons";
 import LoginPopover from "../LoginPopover/LoginPopover";
+import { LoginPopoverUser, RegisterPopoverUser } from "../Auth";
 
 export default function HeaderTopBar() {
+  const [agencyAnchorEl, setAgencyAnchorEl] = useState<null | HTMLElement>(null);
+  const [loginAnchorEl, setLoginAnchorEl] = useState<null | HTMLElement>(null);
+  const [registerAnchorEl, setRegisterAnchorEl] = useState<null | HTMLElement>(null);
+  
+  const agencyButtonRef = useRef<HTMLButtonElement>(null);
+  const userButtonRef = useRef<HTMLButtonElement>(null);
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  const handleOpenLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleOpenAgencyLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAgencyAnchorEl(event.currentTarget);
   };
 
-  const handleCloseLogin = () => {
-    setAnchorEl(null);
+  const handleOpenUserLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setLoginAnchorEl(event.currentTarget);
   };
 
-  const open = Boolean(anchorEl);
+  const handleCloseAgencyLogin = () => {
+    setAgencyAnchorEl(null);
+  };
+
+  const handleCloseUserLogin = () => {
+    setLoginAnchorEl(null);
+  };
+
+  const handleCloseUserRegister = () => {
+    setRegisterAnchorEl(null);
+  };
+
+  // Switch entre login y registro
+  const handleSwitchToRegister = () => {
+    console.log('🔄 Switch to Register - Closing login, opening register');
+    setLoginAnchorEl(null);
+    if (userButtonRef.current) {
+      setRegisterAnchorEl(userButtonRef.current);
+    }
+  };
+
+  const handleSwitchToLogin = () => {
+    console.log('🔄 Switch to Login - Closing register, opening login');
+    setRegisterAnchorEl(null);
+    if (userButtonRef.current) {
+      setLoginAnchorEl(userButtonRef.current);
+    }
+  };
+
+  // Switch a agencia desde usuario
+  const handleSwitchToAgency = () => {
+    setLoginAnchorEl(null);
+    setRegisterAnchorEl(null);
+    if (agencyButtonRef.current) {
+      setAgencyAnchorEl(agencyButtonRef.current);
+    }
+  };
+
+  const agencyOpen = Boolean(agencyAnchorEl);
+  const loginOpen = Boolean(loginAnchorEl);
+  const registerOpen = Boolean(registerAnchorEl);
 
   return (
     <>
@@ -52,38 +94,51 @@ export default function HeaderTopBar() {
           </a>
         </div>
         <Stack direction="row" spacing={2} className="items-center text-blue-900">
+          {/* Botón para usuarios normales */}
           <button 
-          ref={buttonRef}
-          onClick={handleOpenLogin}
-          className="flex-center hover:underline cursor-pointer"
+            ref={userButtonRef}
+            onClick={handleOpenUserLogin}
+            className="flex-center hover:underline cursor-pointer"
           >
-            Registro/Iniciar Sesión
+            Iniciar Sesión
           </button>
           <AccountCircleRoundedIcon fontSize="large"></AccountCircleRoundedIcon>
+          
+          {/* Separador */}
+          <span className="text-gray-400">|</span>
+          
+          {/* Botón para agencias */}
+          <button 
+            ref={agencyButtonRef}
+            onClick={handleOpenAgencyLogin}
+            className="flex-center hover:underline cursor-pointer"
+          >
+            Agencias B2B
+          </button>
         </Stack>
       </Stack>
-      <Stack
-        direction="row"
-        spacing={4}
-        className="md:hidden justify-center items-center text-blue-900 "
-      >
-        <a href="#">
-          <FacebookRoundedIcon fontSize="large"></FacebookRoundedIcon>
-        </a>
-        <a href="#">
-          <FontAwesomeIcon icon={faSquareInstagram} className="text-primary text-3xl" />
-        </a>
-        <a href="#">
-          <FontAwesomeIcon icon={faTiktok} className="text-primary text-3xl" />
-        </a>
-      </Stack>
 
-      <LoginPopover 
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleCloseLogin}
+      {/* Popover para login de usuarios */}
+      <LoginPopoverUser 
+        open={loginOpen}
+        anchorEl={loginAnchorEl}
+        onClose={handleCloseUserLogin}
+        onSwitchToAgency={handleSwitchToAgency}
+        onSwitchToRegister={handleSwitchToRegister}
       />
 
+      <RegisterPopoverUser 
+        open={registerOpen}
+        anchorEl={registerAnchorEl}
+        onClose={handleCloseUserRegister}
+        onSwitchToLogin={handleSwitchToLogin}
+      />
+
+      <LoginPopover 
+        open={agencyOpen}
+        anchorEl={agencyAnchorEl}
+        onClose={handleCloseAgencyLogin}
+      />
     </>
   );
 }

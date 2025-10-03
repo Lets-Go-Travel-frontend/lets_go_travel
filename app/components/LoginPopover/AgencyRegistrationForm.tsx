@@ -201,7 +201,7 @@ export default function AgencyRegistrationForm({ onClose }: AgencyRegistrationFo
         <Button
           type="button"
           variant="outlined"
-          onClick={handleCancel}
+          onClick={handleCancel} 
           className="text-gray-600 border-gray-300 hover:bg-gray-50"
           size="large"
         >
