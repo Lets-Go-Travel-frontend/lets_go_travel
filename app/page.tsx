@@ -13,6 +13,7 @@ import { OfertasSearchResults } from "./components/Ofertas";
 import { PaquetesSearchResults } from "./components/Paquetes";
 import { DestinosSearchResults } from "./components/Destinos";
 import { ExcursionesSearchResults } from "./components/Excursiones";
+import { AlojamientosSearchResults } from "./components/Alojamientos";
 
 export default function Home() {
   const [value, setValue] = useState(0);
@@ -35,6 +36,9 @@ export default function Home() {
 
       case 3: // Tab "Excursiones"
         return <ExcursionesSearchResults />;
+
+      case 4: // Tab "Alojamientos"
+        return <AlojamientosSearchResults />;
       
       default:
         // Contenido original para otros tabs
