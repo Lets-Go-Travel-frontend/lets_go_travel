@@ -1,14 +1,18 @@
 import Tabs, { tabsClasses } from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import { SyntheticEvent, useState } from "react";
-import LocalFireDepartmentOutlinedIcon from "@mui/icons-material/LocalFireDepartmentOutlined";
+import { SyntheticEvent } from "react";
 import Image from "next/image";
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+}
+
+interface FinderProps {
+  value: number;
+  onChange: (event: SyntheticEvent, newValue: number) => void;
 }
 
 const tabStyle = {
@@ -48,13 +52,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function Finder() {
-  const [value, setValue] = useState(0);
-
-  const handleChange = (event: SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
-
+export default function Finder({ value, onChange }: FinderProps) {
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 2, borderColor: "white" }}>
@@ -62,7 +60,7 @@ export default function Finder() {
           value={value}
           variant="scrollable"
           scrollButtons
-          onChange={handleChange}
+          onChange={onChange}
           aria-label="visible arrows tabs example"
           sx={{
             [`& .${tabsClasses.scrollButtons}`]: {
@@ -92,37 +90,37 @@ export default function Finder() {
             label="Excursiones"
             icon={<Image src="/images/icons/icon excursiones.png" width={50} height={50} alt="" />}
             iconPosition="top"
-            {...a11yProps(2)}
+            {...a11yProps(3)}
           />
           <Tab
             label="Alojamientos"
             icon={<Image src="/images/icons/icon alojamiento.png" width={50} height={50} alt="" />}
             iconPosition="top"
-            {...a11yProps(2)}
+            {...a11yProps(4)}
           />
           <Tab
             label="Carros"
             icon={<Image src="/images/icons/icon carros.png" width={60} height={60} alt="" />}
             iconPosition="top"
-            {...a11yProps(2)}
+            {...a11yProps(5)}
           />
           <Tab
             label="Vuelos"
             icon={<Image src="/images/icons/icon vuelos.png" width={50} height={50} alt="" />}
             iconPosition="top"
-            {...a11yProps(2)}
+            {...a11yProps(6)}
           />
           <Tab
             label="Alquiler"
             icon={<Image src="/images/icons/icon alquileres.png" width={50} height={50} alt="" />}
             iconPosition="top"
-            {...a11yProps(2)}
+            {...a11yProps(7)}
           />
           <Tab
             label="Eventos"
             icon={<Image src="/images/icons/icon eventos.png" width={50} height={50} alt="" />}
             iconPosition="top"
-            {...a11yProps(2)}
+            {...a11yProps(8)}
           />
         </Tabs>
       </Box>
