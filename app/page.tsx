@@ -12,6 +12,7 @@ import Image from "next/image";
 import { OfertasSearchResults } from "./components/Ofertas";
 import { PaquetesSearchResults } from "./components/Paquetes";
 import { DestinosSearchResults } from "./components/Destinos";
+import { ExcursionesSearchResults } from "./components/Excursiones";
 
 export default function Home() {
   const [value, setValue] = useState(0);
@@ -31,6 +32,9 @@ export default function Home() {
       
       case 2: // Tab "Destinos"
         return <DestinosSearchResults />;
+
+      case 3: // Tab "Excursiones"
+        return <ExcursionesSearchResults />;
       
       default:
         // Contenido original para otros tabs
