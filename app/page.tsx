@@ -14,6 +14,10 @@ import { PaquetesSearchResults } from "./components/Paquetes";
 import { DestinosSearchResults } from "./components/Destinos";
 import { ExcursionesSearchResults } from "./components/Excursiones";
 import { AlojamientosSearchResults } from "./components/Alojamientos";
+import { CarrosSearchResults } from "./components/Carros";
+import { VuelosSearchResults } from "./components/Vuelos";
+import { AlquileresSearchResults } from "./components/Alquileres";
+import { EventosSearchResults } from "./components/Eventos";
 
 export default function Home() {
   const [value, setValue] = useState(0);
@@ -39,6 +43,18 @@ export default function Home() {
 
       case 4: // Tab "Alojamientos"
         return <AlojamientosSearchResults />;
+
+      case 5: // Tab "Carros"
+        return <CarrosSearchResults />;
+
+      case 6: // Tab "Vuelos"
+        return <VuelosSearchResults />;
+
+      case 7: // Tab "Alquiler"
+        return <AlquileresSearchResults />;
+
+      case 8: // Tab "Eventos"
+        return <EventosSearchResults />;
       
       default:
         // Contenido original para otros tabs
