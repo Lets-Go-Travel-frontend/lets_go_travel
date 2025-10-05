@@ -3,6 +3,7 @@
 import { Box, Button } from "@mui/material";
 import OfertaCard from "./OfertaCard";
 import { FiltrosPopover } from "../Filtros";
+import { OrdenarPopover } from "../Ordenar";
 import { useState, useRef } from "react";
 
 const ofertasEjemplo = [
@@ -34,7 +35,9 @@ const ofertasEjemplo = [
 
 export default function OfertasSearchResults() {
   const [filtrosOpen, setFiltrosOpen] = useState(false);
+  const [ordenarOpen, setOrdenarOpen] = useState(false);
   const filtrosButtonRef = useRef<HTMLButtonElement>(null);
+  const ordenarButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleOpenFiltros = () => {
     setFiltrosOpen(true);
@@ -42,6 +45,14 @@ export default function OfertasSearchResults() {
 
   const handleCloseFiltros = () => {
     setFiltrosOpen(false);
+  };
+
+  const handleOpenOrdenar = () => {
+    setOrdenarOpen(true);
+  };
+
+  const handleCloseOrdenar = () => {
+    setOrdenarOpen(false);
   };
 
   return (
@@ -62,7 +73,13 @@ export default function OfertasSearchResults() {
           >
             Filtrar
           </Button>
-          <Button variant="outlined" size="small">
+          <Button 
+            variant="outlined" 
+            size="small"
+            ref={ordenarButtonRef}
+            onClick={handleOpenOrdenar}
+            className="border-orange-500 text-orange-500 hover:bg-orange-50"
+          >
             Ordenar
           </Button>
         </Box>
@@ -72,6 +89,13 @@ export default function OfertasSearchResults() {
         open={filtrosOpen}
         anchorEl={filtrosButtonRef.current}
         onClose={handleCloseFiltros}
+        tipo="ofertas"
+      />
+
+      <OrdenarPopover 
+        open={ordenarOpen}
+        anchorEl={ordenarButtonRef.current}
+        onClose={handleCloseOrdenar}
         tipo="ofertas"
       />
 
