@@ -1,22 +1,27 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Divider, Stack } from "@mui/material";
+import { Divider, Stack, IconButton } from "@mui/material";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import HeadsetMicRoundedIcon from "@mui/icons-material/HeadsetMicRounded";
+import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquareInstagram, faTiktok } from "@fortawesome/free-brands-svg-icons";
 import LoginPopover from "../LoginPopover/LoginPopover";
 import { LoginPopoverUser, RegisterPopoverUser } from "../Auth";
+import { CarritoPopover } from "../Carrito";
 
 export default function HeaderTopBar() {
   const [agencyAnchorEl, setAgencyAnchorEl] = useState<null | HTMLElement>(null);
   const [loginAnchorEl, setLoginAnchorEl] = useState<null | HTMLElement>(null);
   const [registerAnchorEl, setRegisterAnchorEl] = useState<null | HTMLElement>(null);
+  const [carritoAnchorEl, setCarritoAnchorEl] = useState<null | HTMLElement>(null);
   
   const agencyButtonRef = useRef<HTMLButtonElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
+  const carritoButtonRef = useRef<HTMLButtonElement>(null); 
 
   const handleOpenAgencyLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAgencyAnchorEl(event.currentTarget);
@@ -64,9 +69,18 @@ export default function HeaderTopBar() {
     }
   };
 
+  const handleOpenCarrito = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setCarritoAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseCarrito = () => {
+    setCarritoAnchorEl(null);
+  };
+
   const agencyOpen = Boolean(agencyAnchorEl);
   const loginOpen = Boolean(loginAnchorEl);
   const registerOpen = Boolean(registerAnchorEl);
+  const carritoOpen = Boolean(carritoAnchorEl); 
 
   return (
     <>
@@ -94,6 +108,15 @@ export default function HeaderTopBar() {
           </a>
         </div>
         <Stack direction="row" spacing={2} className="items-center text-blue-900">
+
+          <IconButton 
+            ref={carritoButtonRef}
+            onClick={handleOpenCarrito}
+            className="text-blue-900 hover:bg-blue-50"
+          >
+            <ShoppingCartRoundedIcon fontSize="large" />
+          </IconButton>
+
           {/* Botón para usuarios normales */}
           <button 
             ref={userButtonRef}
@@ -138,6 +161,12 @@ export default function HeaderTopBar() {
         open={agencyOpen}
         anchorEl={agencyAnchorEl}
         onClose={handleCloseAgencyLogin}
+      />
+
+      <CarritoPopover 
+        open={carritoOpen}
+        anchorEl={carritoAnchorEl}
+        onClose={handleCloseCarrito}
       />
     </>
   );
