@@ -99,7 +99,8 @@ export default function OfertasSearchResults() {
         tipo="ofertas"
       />
 
-      <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Cambio principal: una columna vertical */}
+      <Box className="flex flex-col gap-6">
         {ofertasEjemplo.map((oferta) => (
           <OfertaCard key={oferta.id} oferta={oferta} />
         ))}
