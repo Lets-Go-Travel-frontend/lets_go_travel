@@ -3,16 +3,17 @@ import HeaderNav from "./HeaderNav";
 import HeaderTopBar from "./HeaderTopBar";
 import { Stack } from "@mui/material";
 
-export default function Header() {
+interface HeaderProps {
+  onLogoClick?: () => void;
+}
+
+export default function Header({ onLogoClick }: HeaderProps) {
   return (
     <header className="w-full">
       <Stack direction={{ md: "row", xs: "column" }} spacing={3} className="items-center">
-        {/* Logo */}
-        <div className="px-6 flex-items-center">
+        <div className="px-6 flex-items-center cursor-pointer" onClick={onLogoClick}>
           <Image src="/images/logo.png" alt="Logo Let's Go Vacation" width={300} height={100} />
         </div>
-
-        {/* Bloque derecho */}
         <div className="flex-1">
           <HeaderTopBar />
           <HeaderNav />
