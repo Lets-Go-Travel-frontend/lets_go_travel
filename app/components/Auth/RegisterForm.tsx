@@ -8,9 +8,11 @@ import {
   Typography,
   Divider,
   IconButton,
-  InputAdornment
+  InputAdornment,
+  Alert
 } from '@mui/material';
 import { Visibility, VisibilityOff, Close, ArrowBack } from '@mui/icons-material';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RegisterFormProps {
   onClose: () => void;
@@ -18,6 +20,8 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormProps) {
+  const { register, loading, error } = useAuth();
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,6 +32,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [localError, setLocalError] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,16 +40,40 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       ...prev,
       [name]: value
     }));
+    // Limpiar errores cuando el usuario escribe
+    if (localError) setLocalError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLocalError('');
+
+    // Validaciones
     if (formData.password !== formData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      setLocalError('Las contraseñas no coinciden');
       return;
     }
-    console.log('Register data:', formData);
-    // Register Logic
+
+    if (formData.password.length < 8) {
+      setLocalError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    try {
+      await register({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone || undefined,
+      });
+      
+      onClose(); // Cerrar el popover
+      
+    } catch (err) {
+      // El error ya está manejado por el hook, pero podemos hacer algo adicional aquí
+      console.log('Error en el formulario:', err);
+    }
   };
 
   const handleTogglePassword = () => {
@@ -64,6 +93,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             onClick={onSwitchToLogin}
             size="small"
             className="text-gray-500 hover:text-gray-700"
+            disabled={loading}
           >
             <ArrowBack fontSize="small" />
           </IconButton>
@@ -75,12 +105,20 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           onClick={onClose}
           size="small"
           className="text-gray-500 hover:text-gray-700"
+          disabled={loading}
         >
           <Close fontSize="small" />
         </IconButton>
       </Box>
 
       <form onSubmit={handleSubmit}>
+        {/* Mostrar errores */}
+        {(error || localError) && (
+          <Alert severity="error" className="mb-4">
+            {error || localError}
+          </Alert>
+        )}
+
         {/* Campos del formulario */}
         <Box className="grid grid-cols-2 gap-3 mb-4">
           <TextField
@@ -91,6 +129,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             onChange={handleInputChange}
             required
             size="small"
+            disabled={loading}
           />
           <TextField
             fullWidth
@@ -100,6 +139,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             onChange={handleInputChange}
             required
             size="small"
+            disabled={loading}
           />
         </Box>
 
@@ -114,6 +154,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           size="small"
           className="mb-4"
           placeholder="tu@email.com"
+          disabled={loading}
         />
 
         <TextField
@@ -125,6 +166,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           size="small"
           className="mb-4"
           placeholder="+1 (000) 000-0000"
+          disabled={loading}
         />
 
         <TextField
@@ -137,6 +179,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           required
           size="small"
           className="mb-3"
+          disabled={loading}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -144,6 +187,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
                   onClick={handleTogglePassword}
                   edge="end"
                   size="small"
+                  disabled={loading}
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -162,6 +206,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           required
           size="small"
           className="mb-4"
+          disabled={loading}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -169,6 +214,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
                   onClick={handleToggleConfirmPassword}
                   edge="end"
                   size="small"
+                  disabled={loading}
                 >
                   {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -181,11 +227,11 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
         <Box className="text-center mb-4">
           <Typography variant="body2" className="text-gray-600">
             Al crear una cuenta, aceptas nuestros{' '}
-            <Button variant="text" size="small" className="text-blue-900 p-0 min-w-0">
+            <Button variant="text" size="small" className="text-blue-900 p-0 min-w-0" disabled={loading}>
               Términos y Condiciones
             </Button>{' '}
             y la{' '}
-            <Button variant="text" size="small" className="text-blue-900 p-0 min-w-0">
+            <Button variant="text" size="small" className="text-blue-900 p-0 min-w-0" disabled={loading}>
               Política de Privacidad
             </Button>
           </Typography>
@@ -196,9 +242,10 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           type="submit"
           variant="contained"
           fullWidth
-          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mb-4"
+          disabled={loading}
+          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mb-4 disabled:bg-gray-400"
         >
-          Crear Cuenta
+          {loading ? 'Creando Cuenta...' : 'Crear Cuenta'}
         </Button>
 
         {/* Divisor */}
@@ -219,7 +266,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             variant="outlined"
             fullWidth
             onClick={onSwitchToLogin}
-            className="border-blue-900 text-blue-900 hover:bg-blue-50"
+            disabled={loading}
+            className="border-blue-900 text-blue-900 hover:bg-blue-50 disabled:border-gray-400 disabled:text-gray-400"
           >
             Iniciar Sesión
           </Button>
