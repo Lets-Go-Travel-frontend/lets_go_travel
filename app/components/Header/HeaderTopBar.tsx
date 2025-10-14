@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Divider, Stack, IconButton } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
+import { Divider, Stack, IconButton, Box, Typography } from "@mui/material";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import HeadsetMicRoundedIcon from "@mui/icons-material/HeadsetMicRounded";
@@ -12,8 +12,12 @@ import { faSquareInstagram, faTiktok } from "@fortawesome/free-brands-svg-icons"
 import LoginPopover from "../LoginPopover/LoginPopover";
 import { LoginPopoverUser, RegisterPopoverUser } from "../Auth";
 import { CarritoPopover } from "../Carrito";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HeaderTopBar() {
+  const { getCurrentUser, logout } = useAuth();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  
   const [agencyAnchorEl, setAgencyAnchorEl] = useState<null | HTMLElement>(null);
   const [loginAnchorEl, setLoginAnchorEl] = useState<null | HTMLElement>(null);
   const [registerAnchorEl, setRegisterAnchorEl] = useState<null | HTMLElement>(null);
@@ -22,6 +26,12 @@ export default function HeaderTopBar() {
   const agencyButtonRef = useRef<HTMLButtonElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
   const carritoButtonRef = useRef<HTMLButtonElement>(null); 
+
+  // Cargar usuario actual
+  useEffect(() => {
+    const user = getCurrentUser();
+    setCurrentUser(user);
+  }, [getCurrentUser]);
 
   const handleOpenAgencyLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAgencyAnchorEl(event.currentTarget);
@@ -77,6 +87,13 @@ export default function HeaderTopBar() {
     setCarritoAnchorEl(null);
   };
 
+  // Logout handler
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+    setLoginAnchorEl(null);
+  };
+
   const agencyOpen = Boolean(agencyAnchorEl);
   const loginOpen = Boolean(loginAnchorEl);
   const registerOpen = Boolean(registerAnchorEl);
@@ -117,20 +134,44 @@ export default function HeaderTopBar() {
             <ShoppingCartRoundedIcon fontSize="large" />
           </IconButton>
 
-          {/* Botón para usuarios normales */}
-          <button 
-            ref={userButtonRef}
-            onClick={handleOpenUserLogin}
-            className="flex-center hover:underline cursor-pointer"
-          >
-            Iniciar Sesión
-          </button>
-          <AccountCircleRoundedIcon fontSize="large"></AccountCircleRoundedIcon>
+          {/* SECCIÓN DE USUARIO - CAMBIA DINÁMICAMENTE */}
+          {currentUser ? (
+            // USUARIO LOGUEADO
+            <Box className="flex items-center gap-2">
+              <AccountCircleRoundedIcon fontSize="large" className="text-green-600" />
+              <Box className="flex flex-col">
+                <Typography variant="body2" className="text-blue-900 font-semibold">
+                  Hola, {currentUser.firstName}
+                </Typography>
+                <Typography variant="caption" className="text-gray-600">
+                  {currentUser.email}
+                </Typography>
+              </Box>
+              <button 
+                onClick={handleLogout}
+                className="text-sm text-red-600 hover:text-red-800 hover:underline ml-2"
+              >
+                Cerrar Sesión
+              </button>
+            </Box>
+          ) : (
+            // USUARIO NO LOGUEADO
+            <>
+              <button 
+                ref={userButtonRef}
+                onClick={handleOpenUserLogin}
+                className="flex-center hover:underline cursor-pointer"
+              >
+                Iniciar Sesión
+              </button>
+              <AccountCircleRoundedIcon fontSize="large"></AccountCircleRoundedIcon>
+            </>
+          )}
           
           {/* Separador */}
           <span className="text-gray-400">|</span>
           
-          {/* Botón para agencias */}
+          {/* Botón para agencias (siempre visible) */}
           <button 
             ref={agencyButtonRef}
             onClick={handleOpenAgencyLogin}
@@ -141,21 +182,25 @@ export default function HeaderTopBar() {
         </Stack>
       </Stack>
 
-      {/* Popover para login de usuarios */}
-      <LoginPopoverUser 
-        open={loginOpen}
-        anchorEl={loginAnchorEl}
-        onClose={handleCloseUserLogin}
-        onSwitchToAgency={handleSwitchToAgency}
-        onSwitchToRegister={handleSwitchToRegister}
-      />
+      {/* Popover para login de usuarios - SOLO para no logueados */}
+      {!currentUser && (
+        <>
+          <LoginPopoverUser 
+            open={loginOpen}
+            anchorEl={loginAnchorEl}
+            onClose={handleCloseUserLogin}
+            onSwitchToAgency={handleSwitchToAgency}
+            onSwitchToRegister={handleSwitchToRegister}
+          />
 
-      <RegisterPopoverUser 
-        open={registerOpen}
-        anchorEl={registerAnchorEl}
-        onClose={handleCloseUserRegister}
-        onSwitchToLogin={handleSwitchToLogin}
-      />
+          <RegisterPopoverUser 
+            open={registerOpen}
+            anchorEl={registerAnchorEl}
+            onClose={handleCloseUserRegister}
+            onSwitchToLogin={handleSwitchToLogin}
+          />
+        </>
+      )}
 
       <LoginPopover 
         open={agencyOpen}
