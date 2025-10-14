@@ -8,9 +8,11 @@ import {
   Typography,
   Divider,
   IconButton,
-  InputAdornment
+  InputAdornment,
+  Alert
 } from '@mui/material';
 import { Visibility, VisibilityOff, Close } from '@mui/icons-material';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginFormProps {
   onClose: () => void;
@@ -18,8 +20,8 @@ interface LoginFormProps {
   onSwitchToAgency: () => void;
 }
 
-
 export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgency }: LoginFormProps) {
+  const { login, loading, error } = useAuth();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -35,10 +37,22 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login data:', formData);
-    // Aquí iría la lógica de autenticación
+    
+    try {
+      await login({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      // Si el login es exitoso, el hook maneja la redirección
+      onClose(); // Cerrar el popover
+      
+    } catch (err) {
+      // El error ya está manejado por el hook
+      console.log('Error en login:', err);
+    }
   };
 
   const handleTogglePassword = () => {
@@ -56,12 +70,20 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           onClick={onClose}
           size="small"
           className="text-gray-500 hover:text-gray-700"
+          disabled={loading}
         >
           <Close fontSize="small" />
         </IconButton>
       </Box>
 
       <form onSubmit={handleSubmit}>
+        {/* Mostrar errores */}
+        {error && (
+          <Alert severity="error" className="mb-4">
+            {error}
+          </Alert>
+        )}
+
         {/* Campos del formulario */}
         <TextField
           fullWidth
@@ -74,6 +96,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           size="small"
           className="mb-4"
           placeholder="tu@email.com"
+          disabled={loading}
         />
 
         <TextField
@@ -86,6 +109,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           required
           size="small"
           className="mb-2"
+          disabled={loading}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -93,6 +117,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
                   onClick={handleTogglePassword}
                   edge="end"
                   size="small"
+                  disabled={loading}
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -106,6 +131,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           <Button 
             size="small" 
             className="text-blue-900 hover:text-blue-700 text-xs"
+            disabled={loading}
           >
             ¿Olvidaste tu contraseña?
           </Button>
@@ -116,9 +142,10 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           type="submit"
           variant="contained"
           fullWidth
-          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mb-4"
+          disabled={loading}
+          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mb-4 disabled:bg-gray-400"
         >
-          Iniciar Sesión
+          {loading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
         </Button>
 
         {/* Divisor */}
@@ -139,8 +166,9 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
             variant="outlined"
             fullWidth
             onClick={onSwitchToRegister}
-            className="border-blue-900 text-blue-900 hover:bg-blue-50"
-            >
+            disabled={loading}
+            className="border-blue-900 text-blue-900 hover:bg-blue-50 disabled:border-gray-400 disabled:text-gray-400"
+          >
             Crear Cuenta
           </Button>
         </Box>
@@ -155,6 +183,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
             size="small"
             className="text-blue-900 hover:text-blue-700"
             onClick={onSwitchToAgency}
+            disabled={loading}
           >
             Registro para Agencias B2B
           </Button>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerUser } from '@/lib/api/auth';
+import { registerUser, loginUser } from '@/lib/api/auth';
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
@@ -45,6 +45,37 @@ export function useAuth() {
     }
   };
 
+  const login = async (data: {
+    email: string;
+    password: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await loginUser(data);
+      
+      if (response.success) {
+        // Guardar sesión
+        localStorage.setItem('current_user', JSON.stringify({
+          email: data.email,
+          firstName: response.data?.first_name,
+          lastName: response.data?.last_name,
+          id: response.data?.user_id
+        }));
+        
+        router.push('/');
+        return response;
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('current_user');
     router.push('/');
@@ -60,6 +91,7 @@ export function useAuth() {
 
   return {
     register,
+    login, 
     logout,
     getCurrentUser,
     loading,

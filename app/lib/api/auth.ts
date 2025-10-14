@@ -1,3 +1,5 @@
+// REGISTER
+
 interface RegisterData {
   email: string;
   password: string;
@@ -67,6 +69,66 @@ export async function registerUser(data: RegisterData): Promise<RegisterResponse
       confirmation_required: false
     },
     message: "User registered successfully",
+    timestamp: new Date().toISOString()
+  };
+}
+
+//LOGIN
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  success: boolean;
+  data?: {
+    user_id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+  message: string;
+  timestamp: string;
+}
+
+// Función MOCK para login
+export async function loginUser(data: LoginData): Promise<LoginResponse> {
+  // Simular delay de red
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Validación básica
+  if (!data.email.includes('@')) {
+    throw new Error('Invalid email format');
+  }
+  
+  // Buscar usuario en localStorage
+  const existingUsers = JSON.parse(localStorage.getItem('mock_users') || '[]');
+  const user = existingUsers.find((u: any) => u.email === data.email);
+  
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Verificar contraseña (en un caso real esto se haría en el backend)
+  if (user.password !== data.password) {
+    throw new Error('Invalid password');
+  }
+  
+  // Simular éxito
+  return {
+    success: true,
+    data: {
+      user_id: user.id,
+      email: user.email,
+      first_name: user.firstName,
+      last_name: user.lastName
+    },
+    message: "Login successful",
     timestamp: new Date().toISOString()
   };
 }
