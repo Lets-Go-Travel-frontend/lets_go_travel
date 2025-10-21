@@ -33,6 +33,51 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [localError, setLocalError] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+
+  // Expresiones regulares para validación
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'email':
+        if (!value) return 'El email es requerido';
+        if (!emailRegex.test(value)) return 'Ingresa un email válido';
+        return '';
+      
+      case 'password':
+        if (!value) return 'La contraseña es requerida';
+        if (value.length < 8) return 'Mínimo 8 caracteres';
+        if (!passwordRegex.test(value)) 
+          return 'Mayúscula, minúscula, número y símbolo';
+        return '';
+      
+      case 'confirmPassword':
+        if (!value) return 'Confirma tu contraseña';
+        if (value !== formData.password) return 'Las contraseñas no coinciden';
+        return '';
+      
+      case 'firstName':
+        if (!value) return 'El nombre es requerido';
+        if (value.length < 2) return 'Mínimo 2 caracteres';
+        return '';
+      
+      case 'lastName':
+        if (!value) return 'El apellido es requerido';
+        if (value.length < 2) return 'Mínimo 2 caracteres';
+        return '';
+      
+      case 'phone':
+        if (value && !phoneRegex.test(value)) 
+          return 'Formato inválido. Ej: +1234567890';
+        return '';
+      
+      default:
+        return '';
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,22 +85,41 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       ...prev,
       [name]: value
     }));
-    // Limpiar errores cuando el usuario escribe
+    
+    // Validación en tiempo real
+    const error = validateField(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+    
     if (localError) setLocalError('');
+  };
+
+  const validateForm = (): boolean => {
+    const errors: {[key: string]: string} = {};
+    
+    // Validar todos los campos requeridos
+    errors.firstName = validateField('firstName', formData.firstName);
+    errors.lastName = validateField('lastName', formData.lastName);
+    errors.email = validateField('email', formData.email);
+    errors.password = validateField('password', formData.password);
+    errors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
+    errors.phone = validateField('phone', formData.phone);
+    
+    setFieldErrors(errors);
+    
+    // Verificar si hay algún error
+    return !Object.values(errors).some(error => error !== '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError('');
 
-    // Validaciones
-    if (formData.password !== formData.confirmPassword) {
-      setLocalError('Las contraseñas no coinciden');
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setLocalError('La contraseña debe tener al menos 8 caracteres');
+    // Validar todo el formulario
+    if (!validateForm()) {
+      setLocalError('Por favor corrige los errores en el formulario');
       return;
     }
 
@@ -71,7 +135,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       onClose(); // Cerrar el popover
       
     } catch (err) {
-      // El error ya está manejado por el hook, pero podemos hacer algo adicional aquí
       console.log('Error en el formulario:', err);
     }
   };
@@ -83,6 +146,33 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
   const handleToggleConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
+
+  // Función para mostrar requisitos de contraseña (versión compacta para popover)
+  const PasswordRequirements = () => (
+    <Box className="mt-1 p-2 bg-blue-50 rounded-lg">
+      <Typography variant="caption" className="text-blue-800 font-semibold block mb-1">
+        La contraseña debe contener:
+      </Typography>
+      <Box className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-blue-700">
+        <span className={formData.password.length >= 8 ? 'text-green-600' : ''}>
+          ✓ 8+ caracteres
+        </span>
+        <span className={/[a-z]/.test(formData.password) ? 'text-green-600' : ''}>
+          ✓ Minúscula
+        </span>
+        <span className={/[A-Z]/.test(formData.password) ? 'text-green-600' : ''}>
+          ✓ Mayúscula
+        </span>
+        <span className={/\d/.test(formData.password) ? 'text-green-600' : ''}>
+          ✓ Número
+        </span>
+        <span className={/[@$!%*?&]/.test(formData.password) ? 'text-green-600' : ''}>
+
+          ✓ Símbolo
+        </span>
+      </Box>
+    </Box>
+  );
 
   return (
     <Box className="w-80 max-w-sm">
@@ -130,6 +220,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             required
             size="small"
             disabled={loading}
+            error={!!fieldErrors.firstName}
+            helperText={fieldErrors.firstName}
           />
           <TextField
             fullWidth
@@ -140,6 +232,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             required
             size="small"
             disabled={loading}
+            error={!!fieldErrors.lastName}
+            helperText={fieldErrors.lastName}
           />
         </Box>
 
@@ -155,6 +249,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           className="mb-4"
           placeholder="tu@email.com"
           disabled={loading}
+          error={!!fieldErrors.email}
+          helperText={fieldErrors.email}
         />
 
         <TextField
@@ -165,36 +261,42 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           onChange={handleInputChange}
           size="small"
           className="mb-4"
-          placeholder="+1 (000) 000-0000"
+          placeholder="+1234567890"
           disabled={loading}
+          error={!!fieldErrors.phone}
+          helperText={fieldErrors.phone || "Ejemplo: +1234567890"}
         />
 
-        <TextField
-          fullWidth
-          label="Contraseña"
-          name="password"
-          type={showPassword ? 'text' : 'password'}
-          value={formData.password}
-          onChange={handleInputChange}
-          required
-          size="small"
-          className="mb-3"
-          disabled={loading}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleTogglePassword}
-                  edge="end"
-                  size="small"
-                  disabled={loading}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box className="mb-3">
+          <TextField
+            fullWidth
+            label="Contraseña"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={handleInputChange}
+            required
+            size="small"
+            disabled={loading}
+            error={!!fieldErrors.password}
+            helperText={fieldErrors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleTogglePassword}
+                    edge="end"
+                    size="small"
+                    disabled={loading}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          {formData.password && <PasswordRequirements />}
+        </Box>
 
         <TextField
           fullWidth
@@ -207,6 +309,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           size="small"
           className="mb-4"
           disabled={loading}
+          error={!!fieldErrors.confirmPassword}
+          helperText={fieldErrors.confirmPassword}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
