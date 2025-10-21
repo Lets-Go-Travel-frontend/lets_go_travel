@@ -4,6 +4,8 @@ import { Popover } from "@mui/material";
 import LoginForm from "./LoginForm";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation"; 
+import { Box, Typography, Link } from "@mui/material";
 
 interface LoginPopoverUserProps {
   open: boolean;
@@ -21,6 +23,7 @@ export default function LoginPopoverUser({
   onSwitchToAgency 
 }: LoginPopoverUserProps) {
   const { getCurrentUser, logout } = useAuth();
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -157,11 +160,30 @@ export default function LoginPopoverUser({
           </div>
         ) : (
           // USUARIO NO LOGUEADO - Mostrar formulario de login
-          <LoginForm 
-            onClose={onClose}
-            onSwitchToRegister={onSwitchToRegister}
-            onSwitchToAgency={onSwitchToAgency}
-          />
+          <>
+            <LoginForm 
+              onClose={onClose}
+              onSwitchToRegister={onSwitchToRegister}
+              onSwitchToAgency={onSwitchToAgency}
+            />
+            
+            {/* NUEVO: Enlace a página completa de login */}
+            <Box className="text-center mt-4 pt-4 border-t border-gray-200">
+              <Typography variant="body2" className="text-gray-600">
+                ¿Prefieres página completa?{' '}
+                <Link 
+                  component="button"
+                  onClick={() => {
+                    onClose();
+                    router.push('/auth/login');
+                  }}
+                  className="text-blue-900 hover:underline font-semibold"
+                >
+                  Ir a página de login
+                </Link>
+              </Typography>
+            </Box>
+          </>
         )}
       </div>
     </Popover>

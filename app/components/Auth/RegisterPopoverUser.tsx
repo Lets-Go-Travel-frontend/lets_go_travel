@@ -3,6 +3,8 @@
 import { Popover } from "@mui/material";
 import RegisterForm from "./RegisterForm";
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Box, Typography, Link } from "@mui/material";
 
 interface RegisterPopoverUserProps {
   open: boolean;
@@ -17,6 +19,7 @@ export default function RegisterPopoverUser({
   onClose, 
   onSwitchToLogin 
 }: RegisterPopoverUserProps) {
+  const router = useRouter();
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,6 +73,23 @@ export default function RegisterPopoverUser({
           onClose={onClose}
           onSwitchToLogin={onSwitchToLogin}
         />
+        
+        {/* NUEVO: Enlace a página completa de registro */}
+        <Box className="text-center mt-4 pt-4 border-t border-gray-200">
+          <Typography variant="body2" className="text-gray-600">
+            ¿Prefieres página completa?{' '}
+            <Link 
+              component="button"
+              onClick={() => {
+                onClose();
+                router.push('/auth/register');
+              }}
+              className="text-blue-900 hover:underline font-semibold"
+            >
+              Ir a página de registro
+            </Link>
+          </Typography>
+        </Box>
       </div>
     </Popover>
   );
