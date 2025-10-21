@@ -1,6 +1,10 @@
-// REGISTER
+// lib/api/auth.ts
 
-interface RegisterData {
+// Cambiamos la URL para usar el proxy local
+const API_BASE_URL = '/api/proxy';
+
+// Interfaces para las requests
+export interface RegisterData {
   email: string;
   password: string;
   firstName: string;
@@ -8,127 +12,178 @@ interface RegisterData {
   phone?: string;
 }
 
-interface RegisterResponse {
-  success: boolean;
-  data?: {
-    user_id: number;
-    cognito_user_id: string;
-    email: string;
-    confirmation_required: boolean;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
-  message: string;
-  timestamp: string;
-}
-
-// MOCK API 
-export async function registerUser(data: RegisterData): Promise<RegisterResponse> {
-  // Simular delay de red
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Validación mock simple
-  if (!data.email.includes('@')) {
-    throw new Error('Invalid email format');
-  }
-  
-  if (data.password.length < 8) {
-    throw new Error('Password must be at least 8 characters');
-  }
-
-  // Verificar si el usuario ya existe (en localStorage)
-  const existingUsers = JSON.parse(localStorage.getItem('mock_users') || '[]');
-  const userExists = existingUsers.some((user: any) => user.email === data.email);
-  
-  if (userExists) {
-    throw new Error('User already exists with this email');
-  }
-  
-  // Crear nuevo usuario
-  const newUser = {
-    id: Date.now(),
-    ...data,
-    createdAt: new Date().toISOString(),
-    searches: [],
-    favorites: []
-  };
-
-  // Guardar en localStorage
-  existingUsers.push(newUser);
-  localStorage.setItem('mock_users', JSON.stringify(existingUsers));
-  
-  // Simular éxito
-  return {
-    success: true,
-    data: {
-      user_id: newUser.id,
-      cognito_user_id: `mock_${newUser.id}`,
-      email: data.email,
-      confirmation_required: false
-    },
-    message: "User registered successfully",
-    timestamp: new Date().toISOString()
-  };
-}
-
-//LOGIN
-
-interface LoginData {
+export interface LoginData {
   email: string;
   password: string;
 }
 
-interface LoginResponse {
-  success: boolean;
-  data?: {
-    user_id: number;
-    email: string;
-    first_name: string;
-    last_name: string;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
-  message: string;
-  timestamp: string;
+export interface VerifyData {
+  access_token: string;
+  email: string;
+  code: string;
 }
 
-// Función MOCK para login
-export async function loginUser(data: LoginData): Promise<LoginResponse> {
-  // Simular delay de red
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Validación básica
-  if (!data.email.includes('@')) {
-    throw new Error('Invalid email format');
-  }
-  
-  // Buscar usuario en localStorage
-  const existingUsers = JSON.parse(localStorage.getItem('mock_users') || '[]');
-  const user = existingUsers.find((u: any) => u.email === data.email);
-  
-  if (!user) {
-    throw new Error('User not found');
-  }
-  
-  // Verificar contraseña (en un caso real esto se haría en el backend)
-  if (user.password !== data.password) {
-    throw new Error('Invalid password');
-  }
-  
-  // Simular éxito
-  return {
-    success: true,
-    data: {
-      user_id: user.id,
-      email: user.email,
-      first_name: user.firstName,
-      last_name: user.lastName
-    },
-    message: "Login successful",
-    timestamp: new Date().toISOString()
-  };
+// Interfaces para las responses (basadas en el Swagger)
+export interface StandardResponse {
+  success: boolean;
+  data?: any;
+  message?: string;
+  timestamp: string;
+  correlation_id?: string;
 }
+
+export interface ErrorResponse {
+  success: boolean;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  timestamp: string;
+  correlation_id?: string;
+}
+
+// Función helper para hacer requests
+async function apiRequest<T>(
+  endpoint: string, 
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
+  // Clonar las opciones para no mutar el original
+  const processedOptions = { ...options };
+
+  // Si el body es un objeto (y no es BodyInit válido), convertirlo a JSON
+  if (processedOptions.body && 
+      typeof processedOptions.body === 'object' && 
+      !(processedOptions.body instanceof FormData) &&
+      !(processedOptions.body instanceof Blob) &&
+      !(processedOptions.body instanceof ArrayBuffer) &&
+      !(processedOptions.body instanceof URLSearchParams)) {
+    
+    processedOptions.body = JSON.stringify(processedOptions.body);
+  }
+
+  const config = {
+    ...processedOptions,
+    headers: {
+      ...defaultHeaders,
+      ...processedOptions.headers,
+    },
+  };
+
+  try {
+    console.log('🔗 Haciendo request a:', url);
+    console.log('📤 Body final:', config.body);
+    
+    const response = await fetch(url, config);
+    console.log('📡 Status:', response.status);
+    
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error?.message || errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: T = await response.json();
+    console.log('✅ Respuesta exitosa:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error en apiRequest:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Error de red desconocido');
+  }
+}
+
+// REGISTER - Endpoint real (usando apiRequest consistentemente)
+export async function registerUser(data: RegisterData): Promise<StandardResponse> {
+  const requestBody = {
+    email: data.email.trim(),
+    password: data.password,
+    first_name: data.firstName.trim(),
+    last_name: data.lastName.trim(),
+    // ❌ Omitir phone temporalmente por bug en el backend
+  };
+
+  console.log('📤 Register request body:', requestBody);
+
+  return apiRequest<StandardResponse>('/v1/auth/register', {
+    method: 'POST',
+    body: requestBody, // Usar apiRequest consistentemente
+  });
+}
+
+// LOGIN - Endpoint real
+export async function loginUser(data: LoginData): Promise<StandardResponse> {
+  const requestBody = {
+    email: data.email.trim(),
+    password: data.password,
+  };
+
+  console.log('📤 Login request body:', requestBody);
+
+  return apiRequest<StandardResponse>('/v1/auth/login', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
+
+// VERIFY - Nuevo endpoint para verificación
+export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
+  const requestBody = {
+    access_token: data.access_token,
+    email: data.email,
+    code: data.code,
+  };
+
+  console.log('📤 Verify request body:', requestBody);
+
+  return apiRequest<StandardResponse>('/v1/auth/verify', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
+
+// LOGOUT - Endpoint real
+export async function logoutUser(token?: string): Promise<StandardResponse> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = token;
+  }
+
+  return apiRequest<StandardResponse>('/v1/auth/logout', {
+    method: 'POST',
+    headers,
+  });
+}
+
+// REFRESH TOKEN - Endpoint real
+export async function refreshToken(): Promise<StandardResponse> {
+  return apiRequest<StandardResponse>('/v1/auth/refresh', {
+    method: 'POST',
+  });
+}
+
+// Exportar todo como objeto por si acaso
+export default {
+  registerUser,
+  loginUser,
+  verifyUser,
+  logoutUser,
+  refreshToken
+};
