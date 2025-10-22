@@ -1,3 +1,4 @@
+// app/components/RegisterForm.tsx
 "use client";
 
 import { useState } from 'react';
@@ -37,7 +38,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
 
   // Expresiones regulares para validación
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const validateField = (name: string, value: string): string => {
@@ -67,11 +67,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       case 'lastName':
         if (!value) return 'El apellido es requerido';
         if (value.length < 2) return 'Mínimo 2 caracteres';
-        return '';
-      
-      case 'phone':
-        if (value && !phoneRegex.test(value)) 
-          return 'Formato inválido. Ej: +1234567890';
         return '';
       
       default:
@@ -105,7 +100,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
     errors.email = validateField('email', formData.email);
     errors.password = validateField('password', formData.password);
     errors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
-    errors.phone = validateField('phone', formData.phone);
     
     setFieldErrors(errors);
     
@@ -129,13 +123,14 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phone: formData.phone || undefined,
+        // phone: formData.phone // Omitido temporalmente por bug en backend
       });
       
-      onClose(); // Cerrar el popover
+      // El hook se encarga del login automático y redirección a verificación
+      // onClose() se llamará automáticamente
       
     } catch (err) {
-      console.log('Error en el formulario:', err);
+      console.log('Error en el formulario de registro:', err);
     }
   };
 
@@ -147,7 +142,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Función para mostrar requisitos de contraseña (versión compacta para popover)
+  // Función para mostrar requisitos de contraseña
   const PasswordRequirements = () => (
     <Box className="mt-1 p-2 bg-blue-50 rounded-lg">
       <Typography variant="caption" className="text-blue-800 font-semibold block mb-1">
@@ -167,7 +162,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           ✓ Número
         </span>
         <span className={/[@$!%*?&]/.test(formData.password) ? 'text-green-600' : ''}>
-
           ✓ Símbolo
         </span>
       </Box>
@@ -253,9 +247,11 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           helperText={fieldErrors.email}
         />
 
+        {/* Teléfono comentado temporalmente */}
+        {/*
         <TextField
           fullWidth
-          label="Teléfono"
+          label="Teléfono (opcional)"
           name="phone"
           value={formData.phone}
           onChange={handleInputChange}
@@ -263,9 +259,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           className="mb-4"
           placeholder="+1234567890"
           disabled={loading}
-          error={!!fieldErrors.phone}
-          helperText={fieldErrors.phone || "Ejemplo: +1234567890"}
         />
+        */}
 
         <Box className="mb-3">
           <TextField
@@ -375,6 +370,13 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           >
             Iniciar Sesión
           </Button>
+        </Box>
+
+        {/* Información sobre verificación */}
+        <Box className="text-center mt-4 pt-4 border-t border-gray-200">
+          <Typography variant="body2" className="text-gray-600">
+            Después del registro, serás redirigido al login para iniciar sesión y luego verificar tu cuenta.
+          </Typography>
         </Box>
       </form>
     </Box>

@@ -1,3 +1,4 @@
+// app/components/LoginForm.tsx
 "use client";
 
 import { useState } from 'react';
@@ -28,6 +29,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [localError, setLocalError] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,23 +37,31 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
       ...prev,
       [name]: value
     }));
+    if (localError) setLocalError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setLocalError('');
+
+    // Validaciones básicas
+    if (!formData.email || !formData.password) {
+      setLocalError('Por favor completa todos los campos');
+      return;
+    }
+
     try {
       await login({
         email: formData.email,
         password: formData.password,
       });
       
-      // Si el login es exitoso, el hook maneja la redirección
-      onClose(); // Cerrar el popover
+      // El hook se encarga de redirigir a verificación
+      // onClose() se llamará automáticamente después de la redirección
       
     } catch (err) {
       // El error ya está manejado por el hook
-      console.log('Error en login:', err);
+      console.log('Error en el formulario de login:', err);
     }
   };
 
@@ -78,9 +88,9 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
 
       <form onSubmit={handleSubmit}>
         {/* Mostrar errores */}
-        {error && (
+        {(error || localError) && (
           <Alert severity="error" className="mb-4">
-            {error}
+            {error || localError}
           </Alert>
         )}
 
@@ -108,7 +118,7 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           onChange={handleInputChange}
           required
           size="small"
-          className="mb-2"
+          className="mb-4"
           disabled={loading}
           InputProps={{
             endAdornment: (
@@ -125,17 +135,6 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
             ),
           }}
         />
-
-        {/* Olvidé mi contraseña */}
-        <Box className="text-right mb-4">
-          <Button 
-            size="small" 
-            className="text-blue-900 hover:text-blue-700 text-xs"
-            disabled={loading}
-          >
-            ¿Olvidaste tu contraseña?
-          </Button>
-        </Box>
 
         {/* Botón de login */}
         <Button
@@ -157,11 +156,8 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           <Divider className="flex-1" />
         </Box>
 
-        {/* Registro */}
-        <Box className="text-center">
-          <Typography variant="body2" className="text-gray-600 mb-2">
-            ¿No tienes una cuenta?
-          </Typography>
+        {/* Botones alternativos */}
+        <Box className="space-y-3">
           <Button
             variant="outlined"
             fullWidth
@@ -171,22 +167,23 @@ export default function LoginForm({ onClose, onSwitchToRegister, onSwitchToAgenc
           >
             Crear Cuenta
           </Button>
-        </Box>
-
-        {/* Agencias B2B */}
-        <Box className="text-center mt-4 pt-4 border-t border-gray-200">
-          <Typography variant="body2" className="text-gray-600 mb-2">
-            ¿Eres una agencia de viajes?
-          </Typography>
+          
           <Button
-            variant="text"
-            size="small"
-            className="text-blue-900 hover:text-blue-700"
+            variant="outlined"
+            fullWidth
             onClick={onSwitchToAgency}
             disabled={loading}
+            className="border-green-600 text-green-600 hover:bg-green-50 disabled:border-gray-400 disabled:text-gray-400"
           >
-            Registro para Agencias B2B
+            Soy Agencia
           </Button>
+        </Box>
+
+        {/* Información sobre verificación */}
+        <Box className="text-center mt-4 pt-4 border-t border-gray-200">
+          <Typography variant="body2" className="text-gray-600">
+            Después del login, necesitarás verificar tu cuenta con el código que enviaremos a tu email.
+          </Typography>
         </Box>
       </form>
     </Box>
