@@ -121,7 +121,7 @@ export async function registerUser(data: RegisterData): Promise<StandardResponse
 
   return apiRequest<StandardResponse>('/v1/auth/register', {
     method: 'POST',
-    body: requestBody, // Usar apiRequest consistentemente
+    body: JSON.stringify(requestBody), // Omitir requestBody, // Usar apiRequest consistentemente
   });
 }
 
@@ -136,7 +136,7 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
 
   return apiRequest<StandardResponse>('/v1/auth/login', {
     method: 'POST',
-    body: requestBody,
+    body: JSON.stringify(requestBody), // Omitir requestBody,
   });
 }
 
@@ -152,7 +152,7 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
 
   return apiRequest<StandardResponse>('/v1/auth/verify', {
     method: 'POST',
-    body: requestBody,
+    body: JSON.stringify(requestBody), // Omitir requestBody,
   });
 }
 
