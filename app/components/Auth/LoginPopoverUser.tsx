@@ -27,7 +27,6 @@ export default function LoginPopoverUser({
   const popoverRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery('(max-width:768px)');
 
-  // Cargar usuario actual cuando se abre el popover
   useEffect(() => {
     if (open) {
       const user = getCurrentUser();
@@ -65,7 +64,6 @@ export default function LoginPopoverUser({
     onClose();
   };
 
-  // Verificar si el usuario necesita verificación
   const userNeedsVerification = currentUser && !isUserVerified();
 
   return (
@@ -101,16 +99,13 @@ export default function LoginPopoverUser({
     >
       <div ref={popoverRef} className="p-4 md:p-6">
         {currentUser && !userNeedsVerification ? (
-          // USUARIO LOGUEADO Y VERIFICADO
           <div className="w-full max-w-sm">
-            {/* Header */}
             <div className="flex justify-between items-center mb-4 md:mb-6">
               <h3 className="text-lg md:text-xl font-bold text-blue-900">
                 Mi Cuenta
               </h3>
             </div>
 
-            {/* Información del usuario */}
             <div className="bg-blue-50 rounded-lg p-3 md:p-4 mb-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg">
@@ -122,37 +117,35 @@ export default function LoginPopoverUser({
                   </p>
                   <p className="text-xs md:text-sm text-gray-600">{currentUser.email}</p>
                   <p className="text-xs text-green-600 font-medium mt-1">
-                    ✅ Cuenta verificada
+                    Cuenta verificada
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Opciones del usuario */}
             <div className="space-y-2 md:space-y-3">
               <button
                 onClick={handleViewProfile}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-blue-900 font-medium text-sm md:text-base"
               >
-                👤 Ver Mi Perfil
+                Ver Mi Perfil
               </button>
               
               <button
                 onClick={handleViewProfile}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-blue-900 font-medium text-sm md:text-base"
               >
-                ❤️ Mis Favoritos
+                Mis Favoritos
               </button>
               
               <button
                 onClick={handleViewProfile}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-blue-900 font-medium text-sm md:text-base"
               >
-                📋 Mis Reservas
+                Mis Reservas
               </button>
             </div>
 
-            {/* Botón de logout */}
             <button
               onClick={handleLogout}
               className="w-full mt-4 md:mt-6 py-3 px-4 bg-red-500 text-white font-medium rounded-md hover:bg-red-600 transition-colors text-sm md:text-base"
@@ -160,7 +153,6 @@ export default function LoginPopoverUser({
               Cerrar Sesión
             </button>
 
-            {/* Información adicional */}
             <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200 text-center">
               <p className="text-xs text-gray-500">
                 Sesión activa
@@ -168,7 +160,6 @@ export default function LoginPopoverUser({
             </div>
           </div>
         ) : userNeedsVerification ? (
-          // USUARIO LOGUEADO PERO NO VERIFICADO
           <div className="w-full max-w-sm text-center">
             <div className="flex justify-between items-center mb-4 md:mb-6">
               <h3 className="text-lg md:text-xl font-bold text-blue-900">
@@ -214,15 +205,14 @@ export default function LoginPopoverUser({
             </button>
           </div>
         ) : (
-          // USUARIO NO LOGUEADO - Mostrar formulario de login
           <>
             <LoginForm 
               onClose={onClose}
               onSwitchToRegister={onSwitchToRegister}
               onSwitchToAgency={onSwitchToAgency}
+              onLoginSuccess={onClose}
             />
             
-            {/* Enlace a página completa de login */}
             <Box className="text-center mt-4 pt-4 border-t border-gray-200">
               <Typography variant="body2" className="text-gray-600 text-xs md:text-sm">
                 ¿Prefieres página completa?{' '}

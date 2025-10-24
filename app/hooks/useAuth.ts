@@ -1,4 +1,3 @@
-// hooks/useAuth.ts - VERSIÓN CORREGIDA
 'use client';
 
 import { useState } from 'react';
@@ -24,9 +23,6 @@ export function useAuth() {
       const response = await registerUser(data);
       
       if (response.success) {
-        console.log('✅ Registro exitoso, haciendo login automático...', response);
-        
-        // HACER LOGIN AUTOMÁTICO después del registro
         await login({
           email: data.email,
           password: data.password
@@ -46,7 +42,7 @@ export function useAuth() {
   const login = async (data: {
     email: string;
     password: string;
-  }) => {
+  }, onSuccess?: () => void) => {
     setLoading(true);
     setError(null);
 
@@ -54,8 +50,6 @@ export function useAuth() {
       const response = await loginUser(data);
       
       if (response.success) {
-        console.log('✅ Login exitoso:', response);
-        
         const accessToken = response.data?.access_token;
         const userData = response.data?.user;
 
@@ -65,10 +59,8 @@ export function useAuth() {
           sessionStorage.setItem('pending_user_data', JSON.stringify(userData));
           
           if (!userData.email_verified) {
-            console.log('🔐 Usuario no verificado, redirigiendo a verificación...');
             router.push(`/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`);
           } else {
-            console.log('🎉 Usuario verificado, guardando en localStorage...');
             const userInfo = {
               email: userData.email,
               firstName: userData.first_name,
@@ -83,6 +75,10 @@ export function useAuth() {
             localStorage.setItem('access_token', accessToken);
             localStorage.setItem('refresh_token', response.data.refresh_token);
             
+            if (onSuccess) {
+              onSuccess();
+            }
+            
             router.push('/');
           }
         }
@@ -95,7 +91,6 @@ export function useAuth() {
       let errorMessage = 'Error de inicio de sesión';
       
       if (err instanceof Error) {
-        // Detectar errores específicos de credenciales
         if (err.message.includes('401') || 
             err.message.includes('Unauthorized') || 
             err.message.includes('invalid') ||
@@ -131,8 +126,6 @@ export function useAuth() {
       const response = await verifyUser(data);
       
       if (response.success) {
-        console.log('✅ Verificación exitosa:', response);
-        
         const pendingUserData = sessionStorage.getItem('pending_user_data');
         const pendingToken = sessionStorage.getItem('pending_verification_token');
         
@@ -150,19 +143,14 @@ export function useAuth() {
             verifiedAt: new Date().toISOString()
           };
           
-          // ✅ FINALMENTE guardar en localStorage
           localStorage.setItem('current_user', JSON.stringify(userInfo));
           localStorage.setItem('access_token', pendingToken);
           
-          // Limpiar datos temporales
           sessionStorage.removeItem('pending_verification_token');
           sessionStorage.removeItem('pending_verification_email');
           sessionStorage.removeItem('pending_user_data');
-          
-          console.log('🎉 Usuario verificado y guardado en localStorage');
         }
         
-        // ✅ CAMBIO 1: Redirigir a la raíz (home) después de verificación
         router.push('/');
         
         return response;
@@ -183,32 +171,22 @@ export function useAuth() {
     setError(null);
 
     try {
-      console.log('🚪 Iniciando logout...');
-      
-      // 1. Llamar al endpoint de logout en la API
       const response = await logoutUser();
       
       if (response.success) {
-        console.log('✅ Logout exitoso en backend');
       }
     } catch (err) {
-      console.error('❌ Error en logout del backend:', err);
     } finally {
-      // 2. SIEMPRE limpiar todo el almacenamiento
-      console.log('🧹 Limpiando almacenamiento...');
       localStorage.removeItem('current_user');
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       
-      // También limpiar sessionStorage
       sessionStorage.removeItem('pending_verification_token');
       sessionStorage.removeItem('pending_verification_email');
       sessionStorage.removeItem('pending_user_data');
       
       setLoading(false);
       
-      // 3. Redirigir al home
-      console.log('🔀 Redirigiendo a home...');
       router.push('/');
       router.refresh();
     }
