@@ -82,11 +82,8 @@ async function apiRequest<T>(
   };
 
   try {
-    console.log('🔗 Haciendo request a:', url);
-    console.log('📤 Body final:', body);
     
     const response = await fetch(url, config);
-    console.log('📡 Status:', response.status);
     
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
@@ -100,10 +97,8 @@ async function apiRequest<T>(
     }
 
     const data: T = await response.json();
-    console.log('✅ Respuesta exitosa:', data);
     return data;
   } catch (error) {
-    console.error('❌ Error en apiRequest:', error);
     if (error instanceof Error) {
       throw error;
     }
@@ -118,10 +113,9 @@ export async function registerUser(data: RegisterData): Promise<StandardResponse
     password: data.password,
     first_name: data.firstName.trim(),
     last_name: data.lastName.trim(),
-    // ❌ Omitir phone temporalmente por bug en el backend
+    //  Omitir phone temporalmente por bug en el backend
   };
 
-  console.log('📤 Register request body:', requestBody);
 
   return apiRequest<StandardResponse>('/v1/auth/register', {
     method: 'POST',
@@ -136,7 +130,6 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
     password: data.password,
   };
 
-  console.log('📤 Login request body:', requestBody);
 
   return apiRequest<StandardResponse>('/v1/auth/login', {
     method: 'POST',
@@ -152,7 +145,6 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
     code: data.code,
   };
 
-  console.log('📤 Verify request body:', requestBody);
 
   return apiRequest<StandardResponse>('/v1/auth/verify', {
     method: 'POST',
@@ -161,7 +153,12 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
 }
 
 // LOGOUT - Endpoint real
-export async function logoutUser(token?: string): Promise<StandardResponse> {
+export async function logoutUser(): Promise<StandardResponse> {
+  let token: string | null = null;
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('access_token');
+  }
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
