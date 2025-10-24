@@ -29,9 +29,10 @@ export default function HeaderTopBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const [agencyAnchorEl, setAgencyAnchorEl] = useState<null | HTMLElement>(null);
-  const [loginAnchorEl, setLoginAnchorEl] = useState<null | HTMLElement>(null);
-  const [registerAnchorEl, setRegisterAnchorEl] = useState<null | HTMLElement>(null);
+  const [userAnchorEl, setUserAnchorEl] = useState<null | HTMLElement>(null); // ✅ UNICO anchorEl para usuario
   const [carritoAnchorEl, setCarritoAnchorEl] = useState<null | HTMLElement>(null);
+  
+  const [activeUserPopover, setActiveUserPopover] = useState<'login' | 'register' | null>(null); // ✅ Controlar qué popup mostrar
   
   const agencyButtonRef = useRef<HTMLButtonElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
@@ -47,41 +48,33 @@ export default function HeaderTopBar() {
     setAgencyAnchorEl(event.currentTarget);
   };
 
-  const handleOpenUserLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setLoginAnchorEl(event.currentTarget);
+  const handleOpenUserPopover = (event: React.MouseEvent<HTMLButtonElement>, type: 'login' | 'register') => {
+    setUserAnchorEl(event.currentTarget); // ✅ MISMO anchorEl
+    setActiveUserPopover(type); // ✅ Controlar qué popup mostrar
   };
 
   const handleCloseAgencyLogin = () => {
     setAgencyAnchorEl(null);
   };
 
-  const handleCloseUserLogin = () => {
-    setLoginAnchorEl(null);
+  const handleCloseUserPopover = () => {
+    setUserAnchorEl(null);
+    setActiveUserPopover(null);
   };
 
-  const handleCloseUserRegister = () => {
-    setRegisterAnchorEl(null);
-  };
-
-  // Switch entre login y registro
+  // Switch entre login y registro - CORREGIDO
   const handleSwitchToRegister = () => {
-    setLoginAnchorEl(null);
-    if (userButtonRef.current) {
-      setRegisterAnchorEl(userButtonRef.current);
-    }
+    setActiveUserPopover('register'); // ✅ Solo cambiar el tipo, mantener el mismo anchorEl
   };
 
   const handleSwitchToLogin = () => {
-    setRegisterAnchorEl(null);
-    if (userButtonRef.current) {
-      setLoginAnchorEl(userButtonRef.current);
-    }
+    setActiveUserPopover('login'); // ✅ Solo cambiar el tipo, mantener el mismo anchorEl
   };
 
   // Switch a agencia desde usuario
   const handleSwitchToAgency = () => {
-    setLoginAnchorEl(null);
-    setRegisterAnchorEl(null);
+    setUserAnchorEl(null);
+    setActiveUserPopover(null);
     if (agencyButtonRef.current) {
       setAgencyAnchorEl(agencyButtonRef.current);
     }
@@ -99,7 +92,8 @@ export default function HeaderTopBar() {
   const handleLogout = () => {
     logout();
     setCurrentUser(null);
-    setLoginAnchorEl(null);
+    setUserAnchorEl(null);
+    setActiveUserPopover(null);
     setMobileMenuOpen(false);
   };
 
@@ -108,8 +102,7 @@ export default function HeaderTopBar() {
   };
 
   const agencyOpen = Boolean(agencyAnchorEl);
-  const loginOpen = Boolean(loginAnchorEl);
-  const registerOpen = Boolean(registerAnchorEl);
+  const userPopoverOpen = Boolean(userAnchorEl); // ✅ Unico estado para ambos popups de usuario
   const carritoOpen = Boolean(carritoAnchorEl); 
 
   return (
@@ -172,7 +165,7 @@ export default function HeaderTopBar() {
             <>
               <button 
                 ref={userButtonRef}
-                onClick={handleOpenUserLogin}
+                onClick={(e) => handleOpenUserPopover(e, 'login')} // ✅ Usar función unificada
                 className="flex-center hover:underline cursor-pointer text-sm md:text-base"
               >
                 Iniciar Sesión
@@ -230,7 +223,7 @@ export default function HeaderTopBar() {
           // Usuario no logueado - mostrar botón de login
           <button 
             ref={userButtonRef}
-            onClick={handleOpenUserLogin}
+            onClick={(e) => handleOpenUserPopover(e, 'login')} // ✅ Usar función unificada
             className="text-blue-900 hover:underline cursor-pointer text-sm font-semibold px-2 py-1"
           >
             Iniciar Sesión
@@ -303,7 +296,7 @@ export default function HeaderTopBar() {
               <button 
                 ref={userButtonRef}
                 onClick={(e) => {
-                  handleOpenUserLogin(e);
+                  handleOpenUserPopover(e, 'login'); // ✅ Usar función unificada
                   setMobileMenuOpen(false);
                 }}
                 className="w-full text-left p-3 hover:bg-blue-50 rounded border border-blue-100 text-blue-900 font-semibold"
@@ -342,21 +335,21 @@ export default function HeaderTopBar() {
         </div>
       </Drawer>
 
-      {/* Popovers */}
+      {/* Popovers - AHORA CON MISMO anchorEl */}
       {!currentUser && (
         <>
           <LoginPopoverUser 
-            open={loginOpen}
-            anchorEl={loginAnchorEl}
-            onClose={handleCloseUserLogin}
+            open={userPopoverOpen && activeUserPopover === 'login'} // ✅ Controlado por estado
+            anchorEl={userAnchorEl} // ✅ MISMO anchorEl
+            onClose={handleCloseUserPopover}
             onSwitchToAgency={handleSwitchToAgency}
             onSwitchToRegister={handleSwitchToRegister}
           />
 
           <RegisterPopoverUser 
-            open={registerOpen}
-            anchorEl={registerAnchorEl}
-            onClose={handleCloseUserRegister}
+            open={userPopoverOpen && activeUserPopover === 'register'} // ✅ Controlado por estado
+            anchorEl={userAnchorEl} 
+            onClose={handleCloseUserPopover}
             onSwitchToLogin={handleSwitchToLogin}
           />
         </>
