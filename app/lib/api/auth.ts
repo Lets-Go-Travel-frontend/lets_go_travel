@@ -44,9 +44,18 @@ export interface ErrorResponse {
 }
 
 // Función helper para hacer requests
+// lib/api/auth.ts
+
+// ... interfaces y constantes igual ...
+
+// Función helper para hacer requests - CORREGIDA
 async function apiRequest<T>(
   endpoint: string, 
-  options: RequestInit = {}
+  options: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: any; // ← Permitimos any aquí
+  } = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
@@ -55,34 +64,26 @@ async function apiRequest<T>(
     'Accept': 'application/json',
   };
 
-  // Clonar las opciones para no mutar el original
-  const processedOptions = { ...options };
-
-  // Si el body es un objeto (y no es BodyInit válido), convertirlo a JSON
-  if (processedOptions.body && 
-      typeof processedOptions.body === 'object' && 
-      !(processedOptions.body instanceof FormData) &&
-      !(processedOptions.body instanceof Blob) &&
-      !(processedOptions.body instanceof ArrayBuffer) &&
-      !(processedOptions.body instanceof URLSearchParams)) {
-    
-    processedOptions.body = JSON.stringify(processedOptions.body);
+  // Convertir body a JSON string si es un objeto
+  let body: string | undefined;
+  if (options.body && typeof options.body === 'object') {
+    body = JSON.stringify(options.body);
+  } else if (options.body) {
+    body = options.body;
   }
 
-  const config = {
-    ...processedOptions,
+  const config: RequestInit = {
+    method: options.method,
     headers: {
       ...defaultHeaders,
-      ...processedOptions.headers,
+      ...options.headers,
     },
+    body: body,
   };
 
   try {
-    console.log('🔗 Haciendo request a:', url);
-    console.log('📤 Body final:', config.body);
     
     const response = await fetch(url, config);
-    console.log('📡 Status:', response.status);
     
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
@@ -96,10 +97,8 @@ async function apiRequest<T>(
     }
 
     const data: T = await response.json();
-    console.log('✅ Respuesta exitosa:', data);
     return data;
   } catch (error) {
-    console.error('❌ Error en apiRequest:', error);
     if (error instanceof Error) {
       throw error;
     }
@@ -114,10 +113,9 @@ export async function registerUser(data: RegisterData): Promise<StandardResponse
     password: data.password,
     first_name: data.firstName.trim(),
     last_name: data.lastName.trim(),
-    // ❌ Omitir phone temporalmente por bug en el backend
+    //  Omitir phone temporalmente por bug en el backend
   };
 
-  console.log('📤 Register request body:', requestBody);
 
   return apiRequest<StandardResponse>('/v1/auth/register', {
     method: 'POST',
@@ -132,7 +130,6 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
     password: data.password,
   };
 
-  console.log('📤 Login request body:', requestBody);
 
   return apiRequest<StandardResponse>('/v1/auth/login', {
     method: 'POST',
@@ -148,7 +145,6 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
     code: data.code,
   };
 
-  console.log('📤 Verify request body:', requestBody);
 
   return apiRequest<StandardResponse>('/v1/auth/verify', {
     method: 'POST',
@@ -157,7 +153,12 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
 }
 
 // LOGOUT - Endpoint real
-export async function logoutUser(token?: string): Promise<StandardResponse> {
+export async function logoutUser(): Promise<StandardResponse> {
+  let token: string | null = null;
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('access_token');
+  }
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };

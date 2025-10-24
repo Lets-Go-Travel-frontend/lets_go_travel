@@ -1,9 +1,9 @@
-// hooks/useAuth.ts - Versión simple
+// hooks/useAuth.ts - VERSIÓN CORREGIDA (Opción 1)
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerUser, loginUser, logoutUser } from '@/lib/api/auth';
+import { registerUser, loginUser, logoutUser, verifyUser } from '@/lib/api/auth';
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
@@ -57,28 +57,39 @@ export function useAuth() {
         console.log('✅ Login exitoso:', response);
         
         const accessToken = response.data?.access_token;
+        const userData = response.data?.user;
 
-        if (accessToken) {
-          // Guardar tokens
-          localStorage.setItem('access_token', accessToken);
-          localStorage.setItem('refresh_token', response.data.refresh_token);
+        if (accessToken && userData) {
+          sessionStorage.setItem('pending_verification_token', accessToken);
+          sessionStorage.setItem('pending_verification_email', data.email);
+          sessionStorage.setItem('pending_user_data', JSON.stringify(userData));
           
-          const userInfo = {
-            email: data.email,
-            firstName: response.data?.user?.first_name,
-            lastName: response.data?.user?.last_name,
-            userId: response.data?.user?.user_id,
-            userType: response.data?.user?.user_type,
-            needsVerification: true // SIEMPRE asumir que necesita verificación después del login
-          };
-          localStorage.setItem('current_user', JSON.stringify(userInfo));
-          
-          // SIEMPRE redirigir a verificación después del login
-          console.log('🔐 Redirigiendo a verificación...');
-          router.push(`/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`);
+          if (!userData.email_verified) {
+            console.log('🔐 Usuario no verificado, redirigiendo a verificación...');
+            router.push(`/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`);
+          } else {
+            console.log('🎉 Usuario verificado, guardando en localStorage...');
+            const userInfo = {
+              email: userData.email,
+              firstName: userData.first_name,
+              lastName: userData.last_name,
+              userId: userData.user_id,
+              userType: userData.user_type,
+              emailVerified: true,
+              needsVerification: false
+            };
+            
+            localStorage.setItem('current_user', JSON.stringify(userInfo));
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', response.data.refresh_token);
+            
+            router.push('/dashboard');
+          }
         }
         
         return response;
+      } else {
+        throw new Error(response.message || 'Login failed');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
@@ -98,25 +109,46 @@ export function useAuth() {
     setError(null);
 
     try {
-      const { verifyUser } = await import('@/lib/api/auth');
       const response = await verifyUser(data);
       
       if (response.success) {
         console.log('✅ Verificación exitosa:', response);
         
-        // Marcar como verificado
-        const currentUser = getCurrentUser();
-        const updatedUser = {
-          ...currentUser,
-          needsVerification: false,
-          isVerified: true,
-          verifiedAt: new Date().toISOString()
-        };
+        const pendingUserData = sessionStorage.getItem('pending_user_data');
+        const pendingToken = sessionStorage.getItem('pending_verification_token');
         
-        localStorage.setItem('current_user', JSON.stringify(updatedUser));
-        router.push('/');
+        if (pendingUserData && pendingToken) {
+          const userData = JSON.parse(pendingUserData);
+          
+          const userInfo = {
+            email: userData.email,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            userId: userData.user_id,
+            userType: userData.user_type,
+            emailVerified: true, // ← Ahora sí está verificado
+            needsVerification: false,
+            verifiedAt: new Date().toISOString()
+          };
+          
+          // ✅ FINALMENTE guardar en localStorage
+          localStorage.setItem('current_user', JSON.stringify(userInfo));
+          localStorage.setItem('access_token', pendingToken);
+          
+          // Limpiar datos temporales
+          sessionStorage.removeItem('pending_verification_token');
+          sessionStorage.removeItem('pending_verification_email');
+          sessionStorage.removeItem('pending_user_data');
+          
+          console.log('🎉 Usuario verificado y guardado en localStorage');
+        }
+        
+        // Redirigir al dashboard después de verificación exitosa
+        router.push('/dashboard');
         
         return response;
+      } else {
+        throw new Error(response.message || 'Verification failed');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Verification failed';
@@ -127,11 +159,38 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    router.push('/');
+  const logout = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log('🚪 Iniciando logout...');
+      
+      // 1. Llamar al endpoint de logout en la API
+      const response = await logoutUser();
+      
+      if (response.success) {
+      }
+    } catch (err) {
+    } finally {
+      // 2. SIEMPRE limpiar todo el almacenamiento
+      console.log('🧹 Limpiando almacenamiento...');
+      localStorage.removeItem('current_user');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      
+      // También limpiar sessionStorage
+      sessionStorage.removeItem('pending_verification_token');
+      sessionStorage.removeItem('pending_verification_email');
+      sessionStorage.removeItem('pending_user_data');
+      
+      setLoading(false);
+      
+      // 3. Redirigir al home
+      console.log('🔀 Redirigiendo a home...');
+      router.push('/');
+      router.refresh();
+    }
   };
 
   const getCurrentUser = () => {
@@ -151,7 +210,29 @@ export function useAuth() {
 
   const isUserVerified = () => {
     const user = getCurrentUser();
-    return user && user.isVerified;
+    return user && user.emailVerified;
+  };
+
+  const hasPendingVerification = () => {
+    if (typeof window !== 'undefined') {
+      return !!sessionStorage.getItem('pending_verification_token');
+    }
+    return false;
+  };
+
+  const getPendingVerificationData = () => {
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('pending_verification_token');
+      const email = sessionStorage.getItem('pending_verification_email');
+      const userData = sessionStorage.getItem('pending_user_data');
+      
+      return {
+        token,
+        email,
+        userData: userData ? JSON.parse(userData) : null
+      };
+    }
+    return null;
   };
 
   return {
@@ -162,6 +243,8 @@ export function useAuth() {
     getCurrentUser,
     getAccessToken,
     isUserVerified,
+    hasPendingVerification, 
+    getPendingVerificationData, 
     loading,
     error,
   };
