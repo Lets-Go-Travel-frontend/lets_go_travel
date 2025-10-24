@@ -1,10 +1,9 @@
 "use client";
 
-import { Popover } from "@mui/material";
+import { Popover, useMediaQuery, Box, Typography, Link } from "@mui/material";
 import RegisterForm from "./RegisterForm";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Typography, Link } from "@mui/material";
 
 interface RegisterPopoverUserProps {
   open: boolean;
@@ -21,6 +20,7 @@ export default function RegisterPopoverUser({
 }: RegisterPopoverUserProps) {
   const router = useRouter();
   const popoverRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,26 +57,31 @@ export default function RegisterPopoverUser({
       }}
       slotProps={{
         paper: {
-          className: "popover-with-arrow",
-          style: {
-            overflow: 'visible',
-            width: 'fit-content',
-            display: 'inline-block',
-            position: 'relative',
-            maxWidth: '400px',
+          sx: {
+            width: isMobile ? '95vw' : 400,
+            maxWidth: '95vw',
+            margin: isMobile ? 'auto' : 'inherit',
+            position: 'fixed',
+            top: isMobile ? '50%' : 'inherit',
+            left: isMobile ? '50%' : 'inherit',
+            transform: isMobile ? 'translate(-50%, -50%)' : 'inherit',
+            maxHeight: isMobile ? '85vh' : 'none',
+            overflow: 'auto',
+            borderRadius: '12px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
           }
         }
       }}
     >
-      <div ref={popoverRef} className="p-6">
+      <div ref={popoverRef} className="p-4 md:p-6">
         <RegisterForm 
           onClose={onClose}
           onSwitchToLogin={onSwitchToLogin}
         />
         
-        {/* NUEVO: Enlace a página completa de registro */}
+        {/* Enlace a página completa de registro */}
         <Box className="text-center mt-4 pt-4 border-t border-gray-200">
-          <Typography variant="body2" className="text-gray-600">
+          <Typography variant="body2" className="text-gray-600 text-xs md:text-sm">
             ¿Prefieres página completa?{' '}
             <Link 
               component="button"
@@ -84,7 +89,7 @@ export default function RegisterPopoverUser({
                 onClose();
                 router.push('/auth/register');
               }}
-              className="text-blue-900 hover:underline font-semibold"
+              className="text-blue-900 hover:underline font-semibold text-xs md:text-sm"
             >
               Ir a página de registro
             </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Popover, Typography, IconButton } from "@mui/material";
+import { Popover, Typography, IconButton, useMediaQuery } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import AgencyRegistrationForm from "./AgencyRegistrationForm";
 import { useEffect, useRef } from "react";
@@ -13,6 +13,7 @@ interface LoginPopoverProps {
 
 export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,18 +50,23 @@ export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverPr
       }}
       slotProps={{
         paper: {
-          className: "popover-with-arrow",
-          style: {
-            overflow: 'visible',
-            width: 'fit-content',
-            display: 'inline-block',
-            position: 'relative',
-            maxWidth: '600px',
+          sx: {
+            width: isMobile ? '95vw' : 'auto',
+            maxWidth: '95vw',
+            margin: isMobile ? 'auto' : 'inherit',
+            position: 'fixed',
+            top: isMobile ? '50%' : 'inherit',
+            left: isMobile ? '50%' : 'inherit',
+            transform: isMobile ? 'translate(-50%, -50%)' : 'inherit',
+            maxHeight: isMobile ? '85vh' : 'none',
+            overflow: 'auto',
+            borderRadius: '12px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
           }
         }
       }}
     >
-      <div ref={popoverRef} className="p-6 relative">
+      <div ref={popoverRef} className="p-4 md:p-6 relative">
         <IconButton
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -69,11 +75,13 @@ export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverPr
           <Close fontSize="small" />
         </IconButton>
         
-        <Typography variant="h6" className="text-blue-900 font-bold mb-4 pr-8">
+        <Typography variant="h6" className="text-blue-900 font-bold mb-4 pr-8 text-lg md:text-xl">
           Registro de Agencia
         </Typography>
         
-        <AgencyRegistrationForm onClose={onClose} />
+        <div className={isMobile ? "max-h-[60vh] overflow-y-auto" : ""}>
+          <AgencyRegistrationForm onClose={onClose} />
+        </div>
       </div>
     </Popover>
   );
