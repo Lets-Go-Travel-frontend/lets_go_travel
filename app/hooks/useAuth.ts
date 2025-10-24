@@ -1,4 +1,4 @@
-// hooks/useAuth.ts - VERSIÓN CORREGIDA (Opción 1)
+// hooks/useAuth.ts - VERSIÓN CORREGIDA
 'use client';
 
 import { useState } from 'react';
@@ -83,7 +83,7 @@ export function useAuth() {
             localStorage.setItem('access_token', accessToken);
             localStorage.setItem('refresh_token', response.data.refresh_token);
             
-            router.push('/dashboard');
+            router.push('/');
           }
         }
         
@@ -92,9 +92,28 @@ export function useAuth() {
         throw new Error(response.message || 'Login failed');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      let errorMessage = 'Error de inicio de sesión';
+      
+      if (err instanceof Error) {
+        // Detectar errores específicos de credenciales
+        if (err.message.includes('401') || 
+            err.message.includes('Unauthorized') || 
+            err.message.includes('invalid') ||
+            err.message.includes('credenciales') ||
+            err.message.toLowerCase().includes('password') ||
+            err.message.toLowerCase().includes('email')) {
+          errorMessage = 'Usuario o contraseña incorrectos';
+        } else if (err.message.includes('429')) {
+          errorMessage = 'Demasiados intentos. Por favor, espera unos minutos.';
+        } else if (err.message.includes('400')) {
+          errorMessage = 'Datos de inicio de sesión inválidos';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
       setError(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -126,7 +145,7 @@ export function useAuth() {
             lastName: userData.last_name,
             userId: userData.user_id,
             userType: userData.user_type,
-            emailVerified: true, // ← Ahora sí está verificado
+            emailVerified: true,
             needsVerification: false,
             verifiedAt: new Date().toISOString()
           };
@@ -143,8 +162,8 @@ export function useAuth() {
           console.log('🎉 Usuario verificado y guardado en localStorage');
         }
         
-        // Redirigir al dashboard después de verificación exitosa
-        router.push('/dashboard');
+        // ✅ CAMBIO 1: Redirigir a la raíz (home) después de verificación
+        router.push('/');
         
         return response;
       } else {
@@ -170,8 +189,10 @@ export function useAuth() {
       const response = await logoutUser();
       
       if (response.success) {
+        console.log('✅ Logout exitoso en backend');
       }
     } catch (err) {
+      console.error('❌ Error en logout del backend:', err);
     } finally {
       // 2. SIEMPRE limpiar todo el almacenamiento
       console.log('🧹 Limpiando almacenamiento...');
