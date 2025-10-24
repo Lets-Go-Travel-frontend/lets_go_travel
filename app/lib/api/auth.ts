@@ -44,9 +44,18 @@ export interface ErrorResponse {
 }
 
 // Función helper para hacer requests
+// lib/api/auth.ts
+
+// ... interfaces y constantes igual ...
+
+// Función helper para hacer requests - CORREGIDA
 async function apiRequest<T>(
   endpoint: string, 
-  options: RequestInit = {}
+  options: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: any; // ← Permitimos any aquí
+  } = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
@@ -55,31 +64,26 @@ async function apiRequest<T>(
     'Accept': 'application/json',
   };
 
-  // Clonar las opciones para no mutar el original
-  const processedOptions = { ...options };
-
-  // Si el body es un objeto (y no es BodyInit válido), convertirlo a JSON
-  if (processedOptions.body && 
-      typeof processedOptions.body === 'object' && 
-      !(processedOptions.body instanceof FormData) &&
-      !(processedOptions.body instanceof Blob) &&
-      !(processedOptions.body instanceof ArrayBuffer) &&
-      !(processedOptions.body instanceof URLSearchParams)) {
-    
-    processedOptions.body = JSON.stringify(processedOptions.body);
+  // Convertir body a JSON string si es un objeto
+  let body: string | undefined;
+  if (options.body && typeof options.body === 'object') {
+    body = JSON.stringify(options.body);
+  } else if (options.body) {
+    body = options.body;
   }
 
-  const config = {
-    ...processedOptions,
+  const config: RequestInit = {
+    method: options.method,
     headers: {
       ...defaultHeaders,
-      ...processedOptions.headers,
+      ...options.headers,
     },
+    body: body,
   };
 
   try {
     console.log('🔗 Haciendo request a:', url);
-    console.log('📤 Body final:', config.body);
+    console.log('📤 Body final:', body);
     
     const response = await fetch(url, config);
     console.log('📡 Status:', response.status);
