@@ -101,7 +101,7 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             {...a11yProps(4)}
           />
           <Tab
-            label="Carros"
+            label="Renta de autos"
             icon={<Image src="/images/icons/icon carros.png" width={42} height={42} alt="Carros" />}
             iconPosition="top"
             {...a11yProps(5)}

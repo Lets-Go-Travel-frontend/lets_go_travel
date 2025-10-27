@@ -32,7 +32,6 @@ export default function RegisterPageForm() {
   const [localError, setLocalError] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
 
-  // Expresiones regulares para validación
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -83,7 +82,6 @@ export default function RegisterPageForm() {
       [name]: value
     }));
     
-    // Validación en tiempo real
     const error = validateField(name, value);
     setFieldErrors(prev => ({
       ...prev,
@@ -96,7 +94,6 @@ export default function RegisterPageForm() {
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {};
     
-    // Validar todos los campos requeridos
     errors.firstName = validateField('firstName', formData.firstName);
     errors.lastName = validateField('lastName', formData.lastName);
     errors.email = validateField('email', formData.email);
@@ -106,7 +103,6 @@ export default function RegisterPageForm() {
     
     setFieldErrors(errors);
     
-    // Verificar si hay algún error
     return !Object.values(errors).some(error => error !== '');
   };
 
@@ -114,7 +110,6 @@ export default function RegisterPageForm() {
     e.preventDefault();
     setLocalError('');
 
-    // Validar todo el formulario
     if (!validateForm()) {
       setLocalError('Por favor corrige los errores en el formulario');
       return;
@@ -150,7 +145,6 @@ export default function RegisterPageForm() {
     router.push('/auth/login');
   };
 
-  // Función para mostrar requisitos de contraseña
   const PasswordRequirements = () => (
     <Box className="mt-2 p-3 bg-blue-50 rounded-lg">
       <Typography variant="caption" className="text-blue-800 font-semibold block mb-2">
@@ -182,19 +176,16 @@ export default function RegisterPageForm() {
       onSubmit={handleSubmit}
       className="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200 max-w-md mx-auto"
     >
-      {/* Logo centrado arriba */}
-      <Box className="text-center mb-4">
+      <Box className="mb-4">
         <img 
           src="/images/logo.png" 
           alt="Let's Go Vacation" 
           width={180} 
           height={72}
-          className="mx-auto"
         />
       </Box>
 
-      {/* Título en gris oscuro */}
-      <Box className="text-center mb-6">
+      <Box className="mb-6">
         <Typography 
           variant="h4" 
           className="font-bold text-gray-800"
@@ -203,7 +194,6 @@ export default function RegisterPageForm() {
         </Typography>
       </Box>
 
-      {/* Botón volver */}
       <Box className="flex items-center mb-2">
         <IconButton
           onClick={handleBackToHome}
@@ -218,14 +208,12 @@ export default function RegisterPageForm() {
         </Typography>
       </Box>
 
-      {/* Mostrar errores generales */}
       {(error || localError) && (
         <Alert severity="error" className="mb-4">
           {error || localError}
         </Alert>
       )}
 
-      {/* Campos del formulario */}
       <Box className="grid grid-cols-2 gap-4">
         <TextField
           fullWidth
@@ -281,29 +269,57 @@ export default function RegisterPageForm() {
         helperText={fieldErrors.phone || "Ejemplo: +1234567890"}
       />
 
+      <TextField
+        fullWidth
+        label="Contraseña"
+        name="password"
+        type={showPassword ? 'text' : 'password'}
+        value={formData.password}
+        onChange={handleInputChange}
+        required
+        size="small"
+        disabled={loading}
+        error={!!fieldErrors.password}
+        helperText={fieldErrors.password}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={handleTogglePassword}
+                edge="end"
+                size="small"
+                disabled={loading}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+
       <Box>
         <TextField
           fullWidth
-          label="Contraseña"
-          name="password"
-          type={showPassword ? 'text' : 'password'}
-          value={formData.password}
+          label="Confirmar Contraseña"
+          name="confirmPassword"
+          type={showConfirmPassword ? 'text' : 'password'}
+          value={formData.confirmPassword}
           onChange={handleInputChange}
           required
           size="small"
           disabled={loading}
-          error={!!fieldErrors.password}
-          helperText={fieldErrors.password}
+          error={!!fieldErrors.confirmPassword}
+          helperText={fieldErrors.confirmPassword}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  onClick={handleTogglePassword}
+                  onClick={handleToggleConfirmPassword}
                   edge="end"
                   size="small"
                   disabled={loading}
                 >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               </InputAdornment>
             ),
@@ -312,36 +328,7 @@ export default function RegisterPageForm() {
         {formData.password && <PasswordRequirements />}
       </Box>
 
-      <TextField
-        fullWidth
-        label="Confirmar Contraseña"
-        name="confirmPassword"
-        type={showConfirmPassword ? 'text' : 'password'}
-        value={formData.confirmPassword}
-        onChange={handleInputChange}
-        required
-        size="small"
-        disabled={loading}
-        error={!!fieldErrors.confirmPassword}
-        helperText={fieldErrors.confirmPassword}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                onClick={handleToggleConfirmPassword}
-                edge="end"
-                size="small"
-                disabled={loading}
-              >
-                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      {/* Términos y condiciones */}
-      <Box className="text-center">
+      <Box>
         <Typography variant="body2" className="text-gray-600">
           Al crear una cuenta, aceptas nuestros{' '}
           <Link href="/terminos" className="text-blue-900 hover:underline">
@@ -354,7 +341,6 @@ export default function RegisterPageForm() {
         </Typography>
       </Box>
 
-      {/* Botón de registro */}
       <Button
         type="submit"
         variant="contained"
@@ -366,8 +352,7 @@ export default function RegisterPageForm() {
         {loading ? 'Creando Cuenta...' : 'Crear Cuenta'}
       </Button>
 
-      {/* Enlace a login */}
-      <Box className="text-center pt-4 border-t border-gray-200">
+      <Box className="pt-4 border-t border-gray-200">
         <Typography variant="body2" className="text-gray-600">
           ¿Ya tienes una cuenta?{' '}
           <Link 
