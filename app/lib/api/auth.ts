@@ -1,9 +1,7 @@
 // lib/api/auth.ts
 
-// Cambiamos la URL para usar el proxy local
 const API_BASE_URL = '/api/proxy';
 
-// Interfaces para las requests
 export interface RegisterData {
   email: string;
   password: string;
@@ -23,7 +21,6 @@ export interface VerifyData {
   code: string;
 }
 
-// Interfaces para las responses (basadas en el Swagger)
 export interface StandardResponse {
   success: boolean;
   data?: any;
@@ -43,18 +40,12 @@ export interface ErrorResponse {
   correlation_id?: string;
 }
 
-// Función helper para hacer requests
-// lib/api/auth.ts
-
-// ... interfaces y constantes igual ...
-
-// Función helper para hacer requests - CORREGIDA
 async function apiRequest<T>(
   endpoint: string, 
   options: {
     method?: string;
     headers?: Record<string, string>;
-    body?: any; // ← Permitimos any aquí
+    body?: any;
   } = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -64,7 +55,6 @@ async function apiRequest<T>(
     'Accept': 'application/json',
   };
 
-  // Convertir body a JSON string si es un objeto
   let body: string | undefined;
   if (options.body && typeof options.body === 'object') {
     body = JSON.stringify(options.body);
@@ -82,7 +72,6 @@ async function apiRequest<T>(
   };
 
   try {
-    
     const response = await fetch(url, config);
     
     if (!response.ok) {
@@ -106,30 +95,26 @@ async function apiRequest<T>(
   }
 }
 
-// REGISTER - Endpoint real (usando apiRequest consistentemente)
 export async function registerUser(data: RegisterData): Promise<StandardResponse> {
   const requestBody = {
     email: data.email.trim(),
     password: data.password,
     first_name: data.firstName.trim(),
     last_name: data.lastName.trim(),
-    //  Omitir phone temporalmente por bug en el backend
+    phone: data.phone?.trim(),
   };
-
 
   return apiRequest<StandardResponse>('/v1/auth/register', {
     method: 'POST',
-    body: requestBody, // Usar apiRequest consistentemente
+    body: requestBody,
   });
 }
 
-// LOGIN - Endpoint real
 export async function loginUser(data: LoginData): Promise<StandardResponse> {
   const requestBody = {
     email: data.email.trim(),
     password: data.password,
   };
-
 
   return apiRequest<StandardResponse>('/v1/auth/login', {
     method: 'POST',
@@ -137,7 +122,6 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
   });
 }
 
-// VERIFY - Nuevo endpoint para verificación
 export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
   const requestBody = {
     access_token: data.access_token,
@@ -145,14 +129,12 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
     code: data.code,
   };
 
-
   return apiRequest<StandardResponse>('/v1/auth/verify', {
     method: 'POST',
     body: requestBody,
   });
 }
 
-// LOGOUT - Endpoint real
 export async function logoutUser(): Promise<StandardResponse> {
   let token: string | null = null;
   if (typeof window !== 'undefined') {
@@ -173,14 +155,12 @@ export async function logoutUser(): Promise<StandardResponse> {
   });
 }
 
-// REFRESH TOKEN - Endpoint real
 export async function refreshToken(): Promise<StandardResponse> {
   return apiRequest<StandardResponse>('/v1/auth/refresh', {
     method: 'POST',
   });
 }
 
-// Exportar todo como objeto por si acaso
 export default {
   registerUser,
   loginUser,

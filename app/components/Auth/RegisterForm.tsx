@@ -37,6 +37,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const phoneRegex = /^[+]?[1-9]\d{1,14}$/;
 
   const validateField = (name: string, value: string): string => {
     switch (name) {
@@ -65,6 +66,11 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       case 'lastName':
         if (!value) return 'El apellido es requerido';
         if (value.length < 2) return 'Mínimo 2 caracteres';
+        return '';
+      
+      case 'phone':
+        if (value && !phoneRegex.test(value)) 
+          return 'Formato de teléfono inválido. Ejemplo: +1234567890';
         return '';
       
       default:
@@ -96,6 +102,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
     errors.email = validateField('email', formData.email);
     errors.password = validateField('password', formData.password);
     errors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
+    errors.phone = validateField('phone', formData.phone);
     
     setFieldErrors(errors);
     
@@ -117,6 +124,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        phone: formData.phone || undefined,
       });
       
     } catch (err) {
@@ -233,6 +241,20 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           helperText={fieldErrors.email}
         />
 
+        <TextField
+          fullWidth
+          label="Teléfono (opcional)"
+          name="phone"
+          value={formData.phone}
+          onChange={handleInputChange}
+          size="small"
+          className="mb-4"
+          placeholder="+1234567890"
+          disabled={loading}
+          error={!!fieldErrors.phone}
+          helperText={fieldErrors.phone || "Ejemplo: +1234567890 o 1234567890"}
+        />
+
         <Box className="mb-3">
           <TextField
             fullWidth
@@ -303,7 +325,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
               disabled={loading}
               style={{ textTransform: 'none' }}
             >
-              Términos y Condiciones
+              Términos y condiciones
             </Button>{' '}
             y la{' '}
             <Button 
@@ -313,7 +335,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
               disabled={loading}
               style={{ textTransform: 'none' }}
             >
-              Política de Privacidad
+              Política de privacidad
             </Button>
           </Typography>
         </Box>
@@ -324,6 +346,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           fullWidth
           disabled={loading}
           className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mb-4 disabled:bg-gray-400"
+          style={{ textTransform: 'none' }}
         >
           {loading ? 'Creando Cuenta...' : 'Crear Cuenta'}
         </Button>
@@ -346,6 +369,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             onClick={onSwitchToLogin}
             disabled={loading}
             className="border-blue-900 text-blue-900 hover:bg-blue-50 disabled:border-gray-400 disabled:text-gray-400"
+            style={{ textTransform: 'none' }}
           >
             Iniciar Sesión
           </Button>
