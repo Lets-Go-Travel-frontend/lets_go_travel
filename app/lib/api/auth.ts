@@ -1,5 +1,3 @@
-// lib/api/auth.ts
-
 const API_BASE_URL = '/api/proxy';
 
 export interface RegisterData {
@@ -15,10 +13,39 @@ export interface LoginData {
   password: string;
 }
 
-export interface VerifyData {
+// export interface VerifyData {
+//   access_token?: string; 
+//   email: string;
+//   code: string;
+//   operation_type: 'email_verification' | 'forgot_password';
+//   new_password?: string;  
+// }
+
+export type EmailVerificationData = {
+  email: string;
   access_token: string;
+  code: string;
+  operation_type: 'email_verification';
+};
+
+
+export type ForgotPasswordData = {
   email: string;
   code: string;
+  new_password: string;
+  operation_type: 'forgot_password';
+};
+
+export type VerifyData = EmailVerificationData | ForgotPasswordData;
+
+export interface RefreshTokenData {
+  refresh_token?: string;
+  current_password?: string;
+  new_password?: string;
+  resend_verification?: string;
+  email?: string;
+  code?: string;
+  operation: 'change_password' | 'token_refresh' | 'forgot_password';
 }
 
 export interface StandardResponse {
@@ -123,13 +150,50 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
 }
 
 export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
+  const requestBody: any = {
+    email: data.email.trim(),
+    code: data.code,
+    operation_type: data.operation_type,
+  };
+
+  if (data.operation_type === 'email_verification') {
+    requestBody.access_token = data.access_token;
+  } else if (data.operation_type === 'forgot_password') {
+    requestBody.new_password = data.new_password;
+  }
+
+  return apiRequest<StandardResponse>('/v1/auth/verify', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
+
+export async function forgotPassword(data: ForgotPasswordData): Promise<StandardResponse> {
   const requestBody = {
-    access_token: data.access_token,
     email: data.email,
     code: data.code,
+    new_password: data.new_password,
+    operation_type: data.operation_type,
   };
 
   return apiRequest<StandardResponse>('/v1/auth/verify', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
+
+export async function refreshToken(data: RefreshTokenData): Promise<StandardResponse> {
+  const requestBody = {
+    refresh_token: data.refresh_token,
+    current_password: data.current_password,
+    new_password: data.new_password,
+    resend_verification: data.resend_verification,
+    email: data.email,
+    code: data.code,
+    operation: data.operation,
+  };
+
+  return apiRequest<StandardResponse>('/v1/auth/refresh', {
     method: 'POST',
     body: requestBody,
   });
@@ -155,16 +219,11 @@ export async function logoutUser(): Promise<StandardResponse> {
   });
 }
 
-export async function refreshToken(): Promise<StandardResponse> {
-  return apiRequest<StandardResponse>('/v1/auth/refresh', {
-    method: 'POST',
-  });
-}
-
 export default {
   registerUser,
   loginUser,
   verifyUser,
+  forgotPassword,
+  refreshToken,
   logoutUser,
-  refreshToken
 };

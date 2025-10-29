@@ -62,6 +62,7 @@ export default function LoginPopoverUser({
 
   const handleViewProfile = () => {
     onClose();
+    router.push('/profile');
   };
 
   const userNeedsVerification = currentUser && !isUserVerified();

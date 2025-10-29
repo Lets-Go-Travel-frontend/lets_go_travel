@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -28,6 +29,7 @@ export default function LoginForm({
 }: LoginFormProps) {
   const { login, loading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,6 +46,11 @@ export default function LoginForm({
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleForgotPassword = () => {
+    onClose();
+    router.push('/auth/forgot-password');
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit} className="space-y-4">
@@ -85,6 +92,17 @@ export default function LoginForm({
           ),
         }}
       />
+
+      <Box className="text-right -mt-2">
+        <Link
+          component="button"
+          type="button"
+          onClick={handleForgotPassword}
+          className="text-blue-900 hover:underline text-xs"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </Box>
 
       <Button
         type="submit"

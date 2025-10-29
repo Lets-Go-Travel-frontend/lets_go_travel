@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerUser, loginUser, logoutUser, verifyUser } from '@/lib/api/auth';
+import { registerUser, loginUser, logoutUser, verifyUser, forgotPassword, refreshToken } from '@/lib/api/auth';
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
@@ -123,7 +123,12 @@ export function useAuth() {
     setError(null);
 
     try {
-      const response = await verifyUser(data);
+      const response = await verifyUser({
+        access_token: data.access_token,
+        email: data.email,
+        code: data.code,
+        operation_type: 'email_verification',
+      });
       
       if (response.success) {
         const pendingUserData = sessionStorage.getItem('pending_user_data');
@@ -159,6 +164,124 @@ export function useAuth() {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Verification failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await refreshToken({
+        email: email,
+        operation: 'forgot_password',
+      });
+      
+      if (response.success) {
+        sessionStorage.setItem('reset_password_email', email);
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to send reset code');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send reset code';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (data: {
+    email: string;
+    code: string;
+    new_password: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Usar el endpoint /verify con operation_type: 'forgot_password'
+      const response = await verifyUser({
+        email: data.email,
+        code: data.code,
+        new_password: data.new_password,
+        operation_type: 'forgot_password',
+      });
+      
+      if (response.success) {
+        // Limpiar storage después del reset exitoso
+        sessionStorage.removeItem('reset_password_email');
+        sessionStorage.removeItem('reset_code_verified');
+        sessionStorage.removeItem('reset_code');
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to reset password');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reset password';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const changePassword = async (data: {
+    current_password: string;
+    new_password: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const refreshTokenValue = localStorage.getItem('refresh_token');
+      
+      const response = await refreshToken({
+        refresh_token: refreshTokenValue || undefined,
+        current_password: data.current_password,
+        new_password: data.new_password,
+        operation: 'change_password',
+      });
+      
+      if (response.success) {
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to change password');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to change password';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const refreshTokenValue = localStorage.getItem('refresh_token');
+      
+      const response = await refreshToken({
+        refresh_token: refreshTokenValue || undefined,
+        resend_verification: 'True',
+        operation: 'token_refresh',
+      });
+      
+      if (response.success) {
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to resend verification code');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resend verification code';
       setError(errorMessage);
       throw err;
     } finally {
@@ -239,11 +362,16 @@ export function useAuth() {
     login,
     verify,
     logout,
+    forgotPassword: requestPasswordReset,
+    resetPassword,
+    changePassword,
+    resendVerification,
     getCurrentUser,
     getAccessToken,
     isUserVerified,
     hasPendingVerification, 
     getPendingVerificationData, 
+    requestPasswordReset,
     loading,
     error,
   };
