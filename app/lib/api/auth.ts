@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api/proxy';
+const API_BASE_URL = "/api/proxy";
 
 export interface RegisterData {
   email: string;
@@ -14,26 +14,31 @@ export interface LoginData {
 }
 
 // export interface VerifyData {
-//   access_token?: string; 
+//   access_token?: string;
 //   email: string;
 //   code: string;
 //   operation_type: 'email_verification' | 'forgot_password';
-//   new_password?: string;  
+//   new_password?: string;
 // }
+enum OperationType {
+  EMAIL_VERIFICATION = "email_verification",
+  FORGOT_PASSWORD = "forgot_password",
+  CHANGE_PASSWORD = "change_password",
+  TOKEN_REFRESH = "token_refresh",
+}
 
 export type EmailVerificationData = {
   email: string;
   access_token: string;
   code: string;
-  operation_type: 'email_verification';
+  operation_type?: OperationType.EMAIL_VERIFICATION;
 };
-
 
 export type ForgotPasswordData = {
   email: string;
   code: string;
   new_password: string;
-  operation_type: 'forgot_password';
+  operation_type: OperationType.FORGOT_PASSWORD;
 };
 
 export type VerifyData = EmailVerificationData | ForgotPasswordData;
@@ -45,7 +50,7 @@ export interface RefreshTokenData {
   resend_verification?: string;
   email?: string;
   code?: string;
-  operation: 'change_password' | 'token_refresh' | 'forgot_password';
+  operation?: OperationType.CHANGE_PASSWORD | OperationType.TOKEN_REFRESH | OperationType.FORGOT_PASSWORD;
 }
 
 export interface StandardResponse {
@@ -68,7 +73,7 @@ export interface ErrorResponse {
 }
 
 async function apiRequest<T>(
-  endpoint: string, 
+  endpoint: string,
   options: {
     method?: string;
     headers?: Record<string, string>;
@@ -76,14 +81,14 @@ async function apiRequest<T>(
   } = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const defaultHeaders = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   };
 
   let body: string | undefined;
-  if (options.body && typeof options.body === 'object') {
+  if (options.body && typeof options.body === "object") {
     body = JSON.stringify(options.body);
   } else if (options.body) {
     body = options.body;
@@ -100,7 +105,7 @@ async function apiRequest<T>(
 
   try {
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
       try {
@@ -118,7 +123,7 @@ async function apiRequest<T>(
     if (error instanceof Error) {
       throw error;
     }
-    throw new Error('Error de red desconocido');
+    throw new Error("Error de red desconocido");
   }
 }
 
@@ -131,8 +136,8 @@ export async function registerUser(data: RegisterData): Promise<StandardResponse
     phone: data.phone?.trim(),
   };
 
-  return apiRequest<StandardResponse>('/v1/auth/register', {
-    method: 'POST',
+  return apiRequest<StandardResponse>("/v1/auth/register", {
+    method: "POST",
     body: JSON.stringify(requestBody), // Omitir requestBody, // Usar apiRequest consistentemente
     // body: requestBody,
   });
@@ -144,8 +149,8 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
     password: data.password,
   };
 
-  return apiRequest<StandardResponse>('/v1/auth/login', {
-    method: 'POST',
+  return apiRequest<StandardResponse>("/v1/auth/login", {
+    method: "POST",
     body: JSON.stringify(requestBody), // Omitir requestBody,
   });
 }
@@ -157,14 +162,14 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
     operation_type: data.operation_type,
   };
 
-  if (data.operation_type === 'email_verification') {
+  if (data.operation_type === "email_verification") {
     requestBody.access_token = data.access_token;
-  } else if (data.operation_type === 'forgot_password') {
+  } else if (data.operation_type === "forgot_password") {
     requestBody.new_password = data.new_password;
   }
 
-  return apiRequest<StandardResponse>('/v1/auth/verify', {
-    method: 'POST',
+  return apiRequest<StandardResponse>("/v1/auth/verify", {
+    method: "POST",
     body: JSON.stringify(requestBody), // Omitir requestBody,
   });
 }
@@ -177,8 +182,8 @@ export async function forgotPassword(data: ForgotPasswordData): Promise<Standard
     operation_type: data.operation_type,
   };
 
-  return apiRequest<StandardResponse>('/v1/auth/verify', {
-    method: 'POST',
+  return apiRequest<StandardResponse>("/v1/auth/verify", {
+    method: "POST",
     body: requestBody,
   });
 }
@@ -194,28 +199,28 @@ export async function refreshToken(data: RefreshTokenData): Promise<StandardResp
     operation: data.operation,
   };
 
-  return apiRequest<StandardResponse>('/v1/auth/refresh', {
-    method: 'POST',
+  return apiRequest<StandardResponse>("/v1/auth/refresh", {
+    method: "POST",
     body: requestBody,
   });
 }
 
 export async function logoutUser(): Promise<StandardResponse> {
   let token: string | null = null;
-  if (typeof window !== 'undefined') {
-    token = localStorage.getItem('access_token');
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("access_token");
   }
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 
   if (token) {
-    headers['Authorization'] = token;
+    headers["Authorization"] = token;
   }
 
-  return apiRequest<StandardResponse>('/v1/auth/logout', {
-    method: 'POST',
+  return apiRequest<StandardResponse>("/v1/auth/logout", {
+    method: "POST",
     headers,
   });
 }

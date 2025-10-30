@@ -59,7 +59,7 @@ export default function VerificationForm({
       const response = await verifyUser({
         access_token: userAccessToken,
         email: userEmail,
-        code: code
+        code: code        
       });
 
       if (response.success) {
