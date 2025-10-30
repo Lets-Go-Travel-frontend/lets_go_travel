@@ -1,8 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { registerUser, loginUser, logoutUser, verifyUser, forgotPassword, refreshToken } from '@/lib/api/auth';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+  verifyUser,
+  forgotPassword,
+  refreshToken,
+  OperationType,
+} from "@/lib/api/auth";
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
@@ -21,17 +29,17 @@ export function useAuth() {
 
     try {
       const response = await registerUser(data);
-      
+
       if (response.success) {
         await login({
           email: data.email,
-          password: data.password
+          password: data.password,
         });
-        
+
         return response;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
       throw err;
     } finally {
@@ -39,27 +47,32 @@ export function useAuth() {
     }
   };
 
-  const login = async (data: {
-    email: string;
-    password: string;
-  }, onSuccess?: () => void) => {
+  const login = async (
+    data: {
+      email: string;
+      password: string;
+    },
+    onSuccess?: () => void
+  ) => {
     setLoading(true);
     setError(null);
 
     try {
       const response = await loginUser(data);
-      
+
       if (response.success) {
         const accessToken = response.data?.access_token;
         const userData = response.data?.user;
 
         if (accessToken && userData) {
-          sessionStorage.setItem('pending_verification_token', accessToken);
-          sessionStorage.setItem('pending_verification_email', data.email);
-          sessionStorage.setItem('pending_user_data', JSON.stringify(userData));
-          
+          sessionStorage.setItem("pending_verification_token", accessToken);
+          sessionStorage.setItem("pending_verification_email", data.email);
+          sessionStorage.setItem("pending_user_data", JSON.stringify(userData));
+
           if (!userData.email_verified) {
-            router.push(`/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`);
+            router.push(
+              `/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`
+            );
           } else {
             const userInfo = {
               email: userData.email,
@@ -68,45 +81,47 @@ export function useAuth() {
               userId: userData.user_id,
               userType: userData.user_type,
               emailVerified: true,
-              needsVerification: false
+              needsVerification: false,
             };
-            
-            localStorage.setItem('current_user', JSON.stringify(userInfo));
-            localStorage.setItem('access_token', accessToken);
-            localStorage.setItem('refresh_token', response.data.refresh_token);
-            
+
+            localStorage.setItem("current_user", JSON.stringify(userInfo));
+            localStorage.setItem("access_token", accessToken);
+            localStorage.setItem("refresh_token", response.data.refresh_token);
+
             if (onSuccess) {
               onSuccess();
             }
-            
-            router.push('/');
+
+            router.push("/");
           }
         }
-        
+
         return response;
       } else {
-        throw new Error(response.message || 'Login failed');
+        throw new Error(response.message || "Login failed");
       }
     } catch (err) {
-      let errorMessage = 'Error de inicio de sesión';
-      
+      let errorMessage = "Error de inicio de sesión";
+
       if (err instanceof Error) {
-        if (err.message.includes('401') || 
-            err.message.includes('Unauthorized') || 
-            err.message.includes('invalid') ||
-            err.message.includes('credenciales') ||
-            err.message.toLowerCase().includes('password') ||
-            err.message.toLowerCase().includes('email')) {
-          errorMessage = 'Usuario o contraseña incorrectos';
-        } else if (err.message.includes('429')) {
-          errorMessage = 'Demasiados intentos. Por favor, espera unos minutos.';
-        } else if (err.message.includes('400')) {
-          errorMessage = 'Datos de inicio de sesión inválidos';
+        if (
+          err.message.includes("401") ||
+          err.message.includes("Unauthorized") ||
+          err.message.includes("invalid") ||
+          err.message.includes("credenciales") ||
+          err.message.toLowerCase().includes("password") ||
+          err.message.toLowerCase().includes("email")
+        ) {
+          errorMessage = "Usuario o contraseña incorrectos";
+        } else if (err.message.includes("429")) {
+          errorMessage = "Demasiados intentos. Por favor, espera unos minutos.";
+        } else if (err.message.includes("400")) {
+          errorMessage = "Datos de inicio de sesión inválidos";
         } else {
           errorMessage = err.message;
         }
       }
-      
+
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -114,11 +129,7 @@ export function useAuth() {
     }
   };
 
-  const verify = async (data: {
-    access_token: string;
-    email: string;
-    code: string;
-  }) => {
+  const verify = async (data: { access_token: string; email: string; code: string }) => {
     setLoading(true);
     setError(null);
 
@@ -127,16 +138,16 @@ export function useAuth() {
         access_token: data.access_token,
         email: data.email,
         code: data.code,
-        operation_type: 'email_verification',
+        operation_type: OperationType.EMAIL_VERIFICATION,
       });
-      
+
       if (response.success) {
-        const pendingUserData = sessionStorage.getItem('pending_user_data');
-        const pendingToken = sessionStorage.getItem('pending_verification_token');
-        
+        const pendingUserData = sessionStorage.getItem("pending_user_data");
+        const pendingToken = sessionStorage.getItem("pending_verification_token");
+
         if (pendingUserData && pendingToken) {
           const userData = JSON.parse(pendingUserData);
-          
+
           const userInfo = {
             email: userData.email,
             firstName: userData.first_name,
@@ -145,25 +156,25 @@ export function useAuth() {
             userType: userData.user_type,
             emailVerified: true,
             needsVerification: false,
-            verifiedAt: new Date().toISOString()
+            verifiedAt: new Date().toISOString(),
           };
-          
-          localStorage.setItem('current_user', JSON.stringify(userInfo));
-          localStorage.setItem('access_token', pendingToken);
-          
-          sessionStorage.removeItem('pending_verification_token');
-          sessionStorage.removeItem('pending_verification_email');
-          sessionStorage.removeItem('pending_user_data');
+
+          localStorage.setItem("current_user", JSON.stringify(userInfo));
+          localStorage.setItem("access_token", pendingToken);
+
+          sessionStorage.removeItem("pending_verification_token");
+          sessionStorage.removeItem("pending_verification_email");
+          sessionStorage.removeItem("pending_user_data");
         }
-        
-        router.push('/');
-        
+
+        router.push("/");
+
         return response;
       } else {
-        throw new Error(response.message || 'Verification failed');
+        throw new Error(response.message || "Verification failed");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Verification failed';
+      const errorMessage = err instanceof Error ? err.message : "Verification failed";
       setError(errorMessage);
       throw err;
     } finally {
@@ -178,17 +189,17 @@ export function useAuth() {
     try {
       const response = await refreshToken({
         email: email,
-        operation: 'forgot_password',
+        operation: OperationType.FORGOT_PASSWORD,
       });
-      
+
       if (response.success) {
-        sessionStorage.setItem('reset_password_email', email);
+        sessionStorage.setItem("reset_password_email", email);
         return response;
       } else {
-        throw new Error(response.message || 'Failed to send reset code');
+        throw new Error(response.message || "Failed to send reset code");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send reset code';
+      const errorMessage = err instanceof Error ? err.message : "Failed to send reset code";
       setError(errorMessage);
       throw err;
     } finally {
@@ -196,11 +207,7 @@ export function useAuth() {
     }
   };
 
-  const resetPassword = async (data: {
-    email: string;
-    code: string;
-    new_password: string;
-  }) => {
+  const resetPassword = async (data: { email: string; code: string; new_password: string }) => {
     setLoading(true);
     setError(null);
 
@@ -210,20 +217,20 @@ export function useAuth() {
         email: data.email,
         code: data.code,
         new_password: data.new_password,
-        operation_type: 'forgot_password',
+        operation_type: OperationType.FORGOT_PASSWORD,
       });
-      
+
       if (response.success) {
         // Limpiar storage después del reset exitoso
-        sessionStorage.removeItem('reset_password_email');
-        sessionStorage.removeItem('reset_code_verified');
-        sessionStorage.removeItem('reset_code');
+        sessionStorage.removeItem("reset_password_email");
+        sessionStorage.removeItem("reset_code_verified");
+        sessionStorage.removeItem("reset_code");
         return response;
       } else {
-        throw new Error(response.message || 'Failed to reset password');
+        throw new Error(response.message || "Failed to reset password");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to reset password';
+      const errorMessage = err instanceof Error ? err.message : "Failed to reset password";
       setError(errorMessage);
       throw err;
     } finally {
@@ -231,30 +238,27 @@ export function useAuth() {
     }
   };
 
-  const changePassword = async (data: {
-    current_password: string;
-    new_password: string;
-  }) => {
+  const changePassword = async (data: { current_password: string; new_password: string }) => {
     setLoading(true);
     setError(null);
 
     try {
-      const refreshTokenValue = localStorage.getItem('refresh_token');
-      
+      const refreshTokenValue = localStorage.getItem("refresh_token");
+
       const response = await refreshToken({
         refresh_token: refreshTokenValue || undefined,
         current_password: data.current_password,
         new_password: data.new_password,
-        operation: 'change_password',
+        operation: OperationType.CHANGE_PASSWORD,
       });
-      
+
       if (response.success) {
         return response;
       } else {
-        throw new Error(response.message || 'Failed to change password');
+        throw new Error(response.message || "Failed to change password");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to change password';
+      const errorMessage = err instanceof Error ? err.message : "Failed to change password";
       setError(errorMessage);
       throw err;
     } finally {
@@ -267,21 +271,21 @@ export function useAuth() {
     setError(null);
 
     try {
-      const refreshTokenValue = localStorage.getItem('refresh_token');
-      
+      const refreshTokenValue = localStorage.getItem("refresh_token");
+
       const response = await refreshToken({
         refresh_token: refreshTokenValue || undefined,
-        resend_verification: 'True',
-        operation: 'token_refresh',
+        resend_verification: "True",
+        operation: OperationType.TOKEN_REFRESH,
       });
-      
+
       if (response.success) {
         return response;
       } else {
-        throw new Error(response.message || 'Failed to resend verification code');
+        throw new Error(response.message || "Failed to resend verification code");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to resend verification code';
+      const errorMessage = err instanceof Error ? err.message : "Failed to resend verification code";
       setError(errorMessage);
       throw err;
     } finally {
@@ -295,37 +299,37 @@ export function useAuth() {
 
     try {
       const response = await logoutUser();
-      
+
       if (response.success) {
       }
     } catch (err) {
     } finally {
-      localStorage.removeItem('current_user');
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      
-      sessionStorage.removeItem('pending_verification_token');
-      sessionStorage.removeItem('pending_verification_email');
-      sessionStorage.removeItem('pending_user_data');
-      
+      localStorage.removeItem("current_user");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+
+      sessionStorage.removeItem("pending_verification_token");
+      sessionStorage.removeItem("pending_verification_email");
+      sessionStorage.removeItem("pending_user_data");
+
       setLoading(false);
-      
-      router.push('/');
+
+      router.push("/");
       router.refresh();
     }
   };
 
   const getCurrentUser = () => {
-    if (typeof window !== 'undefined') {
-      const user = localStorage.getItem('current_user');
+    if (typeof window !== "undefined") {
+      const user = localStorage.getItem("current_user");
       return user ? JSON.parse(user) : null;
     }
     return null;
   };
 
   const getAccessToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('access_token');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("access_token");
     }
     return null;
   };
@@ -336,22 +340,22 @@ export function useAuth() {
   };
 
   const hasPendingVerification = () => {
-    if (typeof window !== 'undefined') {
-      return !!sessionStorage.getItem('pending_verification_token');
+    if (typeof window !== "undefined") {
+      return !!sessionStorage.getItem("pending_verification_token");
     }
     return false;
   };
 
   const getPendingVerificationData = () => {
-    if (typeof window !== 'undefined') {
-      const token = sessionStorage.getItem('pending_verification_token');
-      const email = sessionStorage.getItem('pending_verification_email');
-      const userData = sessionStorage.getItem('pending_user_data');
-      
+    if (typeof window !== "undefined") {
+      const token = sessionStorage.getItem("pending_verification_token");
+      const email = sessionStorage.getItem("pending_verification_email");
+      const userData = sessionStorage.getItem("pending_user_data");
+
       return {
         token,
         email,
-        userData: userData ? JSON.parse(userData) : null
+        userData: userData ? JSON.parse(userData) : null,
       };
     }
     return null;
@@ -369,8 +373,8 @@ export function useAuth() {
     getCurrentUser,
     getAccessToken,
     isUserVerified,
-    hasPendingVerification, 
-    getPendingVerificationData, 
+    hasPendingVerification,
+    getPendingVerificationData,
     requestPasswordReset,
     loading,
     error,

@@ -20,7 +20,7 @@ export interface LoginData {
 //   operation_type: 'email_verification' | 'forgot_password';
 //   new_password?: string;
 // }
-enum OperationType {
+export enum OperationType {
   EMAIL_VERIFICATION = "email_verification",
   FORGOT_PASSWORD = "forgot_password",
   CHANGE_PASSWORD = "change_password",
