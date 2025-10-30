@@ -62,8 +62,7 @@ export default function LoginPageForm() {
   };
 
   const handleForgotPassword = () => {
-    // Aquí podrías redirigir a recuperación de contraseña después
-    console.log('Ir a recuperar contraseña');
+    router.push('/auth/forgot-password');
   };
 
   return (

@@ -1,9 +1,5 @@
-// lib/api/auth.ts
-
-// Cambiamos la URL para usar el proxy local
 const API_BASE_URL = '/api/proxy';
 
-// Interfaces para las requests
 export interface RegisterData {
   email: string;
   password: string;
@@ -17,13 +13,41 @@ export interface LoginData {
   password: string;
 }
 
-export interface VerifyData {
+// export interface VerifyData {
+//   access_token?: string; 
+//   email: string;
+//   code: string;
+//   operation_type: 'email_verification' | 'forgot_password';
+//   new_password?: string;  
+// }
+
+export type EmailVerificationData = {
+  email: string;
   access_token: string;
+  code: string;
+  operation_type: 'email_verification';
+};
+
+
+export type ForgotPasswordData = {
   email: string;
   code: string;
+  new_password: string;
+  operation_type: 'forgot_password';
+};
+
+export type VerifyData = EmailVerificationData | ForgotPasswordData;
+
+export interface RefreshTokenData {
+  refresh_token?: string;
+  current_password?: string;
+  new_password?: string;
+  resend_verification?: string;
+  email?: string;
+  code?: string;
+  operation: 'change_password' | 'token_refresh' | 'forgot_password';
 }
 
-// Interfaces para las responses (basadas en el Swagger)
 export interface StandardResponse {
   success: boolean;
   data?: any;
@@ -43,18 +67,12 @@ export interface ErrorResponse {
   correlation_id?: string;
 }
 
-// Función helper para hacer requests
-// lib/api/auth.ts
-
-// ... interfaces y constantes igual ...
-
-// Función helper para hacer requests - CORREGIDA
 async function apiRequest<T>(
   endpoint: string, 
   options: {
     method?: string;
     headers?: Record<string, string>;
-    body?: any; // ← Permitimos any aquí
+    body?: any;
   } = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -64,7 +82,6 @@ async function apiRequest<T>(
     'Accept': 'application/json',
   };
 
-  // Convertir body a JSON string si es un objeto
   let body: string | undefined;
   if (options.body && typeof options.body === 'object') {
     body = JSON.stringify(options.body);
@@ -82,7 +99,6 @@ async function apiRequest<T>(
   };
 
   try {
-    
     const response = await fetch(url, config);
     
     if (!response.ok) {
@@ -106,30 +122,27 @@ async function apiRequest<T>(
   }
 }
 
-// REGISTER - Endpoint real (usando apiRequest consistentemente)
 export async function registerUser(data: RegisterData): Promise<StandardResponse> {
   const requestBody = {
     email: data.email.trim(),
     password: data.password,
     first_name: data.firstName.trim(),
     last_name: data.lastName.trim(),
-    //  Omitir phone temporalmente por bug en el backend
+    phone: data.phone?.trim(),
   };
-
 
   return apiRequest<StandardResponse>('/v1/auth/register', {
     method: 'POST',
     body: JSON.stringify(requestBody), // Omitir requestBody, // Usar apiRequest consistentemente
+    // body: requestBody,
   });
 }
 
-// LOGIN - Endpoint real
 export async function loginUser(data: LoginData): Promise<StandardResponse> {
   const requestBody = {
     email: data.email.trim(),
     password: data.password,
   };
-
 
   return apiRequest<StandardResponse>('/v1/auth/login', {
     method: 'POST',
@@ -137,14 +150,18 @@ export async function loginUser(data: LoginData): Promise<StandardResponse> {
   });
 }
 
-// VERIFY - Nuevo endpoint para verificación
 export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
-  const requestBody = {
-    access_token: data.access_token,
-    email: data.email,
+  const requestBody: any = {
+    email: data.email.trim(),
     code: data.code,
+    operation_type: data.operation_type,
   };
 
+  if (data.operation_type === 'email_verification') {
+    requestBody.access_token = data.access_token;
+  } else if (data.operation_type === 'forgot_password') {
+    requestBody.new_password = data.new_password;
+  }
 
   return apiRequest<StandardResponse>('/v1/auth/verify', {
     method: 'POST',
@@ -152,7 +169,37 @@ export async function verifyUser(data: VerifyData): Promise<StandardResponse> {
   });
 }
 
-// LOGOUT - Endpoint real
+export async function forgotPassword(data: ForgotPasswordData): Promise<StandardResponse> {
+  const requestBody = {
+    email: data.email,
+    code: data.code,
+    new_password: data.new_password,
+    operation_type: data.operation_type,
+  };
+
+  return apiRequest<StandardResponse>('/v1/auth/verify', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
+
+export async function refreshToken(data: RefreshTokenData): Promise<StandardResponse> {
+  const requestBody = {
+    refresh_token: data.refresh_token,
+    current_password: data.current_password,
+    new_password: data.new_password,
+    resend_verification: data.resend_verification,
+    email: data.email,
+    code: data.code,
+    operation: data.operation,
+  };
+
+  return apiRequest<StandardResponse>('/v1/auth/refresh', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
+
 export async function logoutUser(): Promise<StandardResponse> {
   let token: string | null = null;
   if (typeof window !== 'undefined') {
@@ -173,18 +220,11 @@ export async function logoutUser(): Promise<StandardResponse> {
   });
 }
 
-// REFRESH TOKEN - Endpoint real
-export async function refreshToken(): Promise<StandardResponse> {
-  return apiRequest<StandardResponse>('/v1/auth/refresh', {
-    method: 'POST',
-  });
-}
-
-// Exportar todo como objeto por si acaso
 export default {
   registerUser,
   loginUser,
   verifyUser,
+  forgotPassword,
+  refreshToken,
   logoutUser,
-  refreshToken
 };

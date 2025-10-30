@@ -1,9 +1,8 @@
-// hooks/useAuth.ts - VERSIÓN CORREGIDA
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerUser, loginUser, logoutUser, verifyUser } from '@/lib/api/auth';
+import { registerUser, loginUser, logoutUser, verifyUser, forgotPassword, refreshToken } from '@/lib/api/auth';
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
@@ -24,9 +23,6 @@ export function useAuth() {
       const response = await registerUser(data);
       
       if (response.success) {
-        console.log('✅ Registro exitoso, haciendo login automático...', response);
-        
-        // HACER LOGIN AUTOMÁTICO después del registro
         await login({
           email: data.email,
           password: data.password
@@ -46,7 +42,7 @@ export function useAuth() {
   const login = async (data: {
     email: string;
     password: string;
-  }) => {
+  }, onSuccess?: () => void) => {
     setLoading(true);
     setError(null);
 
@@ -54,8 +50,6 @@ export function useAuth() {
       const response = await loginUser(data);
       
       if (response.success) {
-        console.log('✅ Login exitoso:', response);
-        
         const accessToken = response.data?.access_token;
         const userData = response.data?.user;
 
@@ -65,10 +59,8 @@ export function useAuth() {
           sessionStorage.setItem('pending_user_data', JSON.stringify(userData));
           
           if (!userData.email_verified) {
-            console.log('🔐 Usuario no verificado, redirigiendo a verificación...');
             router.push(`/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`);
           } else {
-            console.log('🎉 Usuario verificado, guardando en localStorage...');
             const userInfo = {
               email: userData.email,
               firstName: userData.first_name,
@@ -83,6 +75,10 @@ export function useAuth() {
             localStorage.setItem('access_token', accessToken);
             localStorage.setItem('refresh_token', response.data.refresh_token);
             
+            if (onSuccess) {
+              onSuccess();
+            }
+            
             router.push('/');
           }
         }
@@ -95,7 +91,6 @@ export function useAuth() {
       let errorMessage = 'Error de inicio de sesión';
       
       if (err instanceof Error) {
-        // Detectar errores específicos de credenciales
         if (err.message.includes('401') || 
             err.message.includes('Unauthorized') || 
             err.message.includes('invalid') ||
@@ -128,11 +123,14 @@ export function useAuth() {
     setError(null);
 
     try {
-      const response = await verifyUser(data);
+      const response = await verifyUser({
+        access_token: data.access_token,
+        email: data.email,
+        code: data.code,
+        operation_type: 'email_verification',
+      });
       
       if (response.success) {
-        console.log('✅ Verificación exitosa:', response);
-        
         const pendingUserData = sessionStorage.getItem('pending_user_data');
         const pendingToken = sessionStorage.getItem('pending_verification_token');
         
@@ -150,19 +148,14 @@ export function useAuth() {
             verifiedAt: new Date().toISOString()
           };
           
-          // ✅ FINALMENTE guardar en localStorage
           localStorage.setItem('current_user', JSON.stringify(userInfo));
           localStorage.setItem('access_token', pendingToken);
           
-          // Limpiar datos temporales
           sessionStorage.removeItem('pending_verification_token');
           sessionStorage.removeItem('pending_verification_email');
           sessionStorage.removeItem('pending_user_data');
-          
-          console.log('🎉 Usuario verificado y guardado en localStorage');
         }
         
-        // ✅ CAMBIO 1: Redirigir a la raíz (home) después de verificación
         router.push('/');
         
         return response;
@@ -178,37 +171,145 @@ export function useAuth() {
     }
   };
 
+  const requestPasswordReset = async (email: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await refreshToken({
+        email: email,
+        operation: 'forgot_password',
+      });
+      
+      if (response.success) {
+        sessionStorage.setItem('reset_password_email', email);
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to send reset code');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send reset code';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (data: {
+    email: string;
+    code: string;
+    new_password: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Usar el endpoint /verify con operation_type: 'forgot_password'
+      const response = await verifyUser({
+        email: data.email,
+        code: data.code,
+        new_password: data.new_password,
+        operation_type: 'forgot_password',
+      });
+      
+      if (response.success) {
+        // Limpiar storage después del reset exitoso
+        sessionStorage.removeItem('reset_password_email');
+        sessionStorage.removeItem('reset_code_verified');
+        sessionStorage.removeItem('reset_code');
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to reset password');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reset password';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const changePassword = async (data: {
+    current_password: string;
+    new_password: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const refreshTokenValue = localStorage.getItem('refresh_token');
+      
+      const response = await refreshToken({
+        refresh_token: refreshTokenValue || undefined,
+        current_password: data.current_password,
+        new_password: data.new_password,
+        operation: 'change_password',
+      });
+      
+      if (response.success) {
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to change password');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to change password';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const refreshTokenValue = localStorage.getItem('refresh_token');
+      
+      const response = await refreshToken({
+        refresh_token: refreshTokenValue || undefined,
+        resend_verification: 'True',
+        operation: 'token_refresh',
+      });
+      
+      if (response.success) {
+        return response;
+      } else {
+        throw new Error(response.message || 'Failed to resend verification code');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resend verification code';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      console.log('🚪 Iniciando logout...');
-      
-      // 1. Llamar al endpoint de logout en la API
       const response = await logoutUser();
       
       if (response.success) {
-        console.log('✅ Logout exitoso en backend');
       }
     } catch (err) {
-      console.error('❌ Error en logout del backend:', err);
     } finally {
-      // 2. SIEMPRE limpiar todo el almacenamiento
-      console.log('🧹 Limpiando almacenamiento...');
       localStorage.removeItem('current_user');
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       
-      // También limpiar sessionStorage
       sessionStorage.removeItem('pending_verification_token');
       sessionStorage.removeItem('pending_verification_email');
       sessionStorage.removeItem('pending_user_data');
       
       setLoading(false);
       
-      // 3. Redirigir al home
-      console.log('🔀 Redirigiendo a home...');
       router.push('/');
       router.refresh();
     }
@@ -261,11 +362,16 @@ export function useAuth() {
     login,
     verify,
     logout,
+    forgotPassword: requestPasswordReset,
+    resetPassword,
+    changePassword,
+    resendVerification,
     getCurrentUser,
     getAccessToken,
     isUserVerified,
     hasPendingVerification, 
     getPendingVerificationData, 
+    requestPasswordReset,
     loading,
     error,
   };

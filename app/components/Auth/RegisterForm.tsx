@@ -1,4 +1,3 @@
-// app/components/RegisterForm.tsx
 "use client";
 
 import { useState } from 'react';
@@ -36,9 +35,9 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
   const [localError, setLocalError] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
 
-  // Expresiones regulares para validación
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const phoneRegex = /^[+]?[1-9]\d{1,14}$/;
 
   const validateField = (name: string, value: string): string => {
     switch (name) {
@@ -69,6 +68,11 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
         if (value.length < 2) return 'Mínimo 2 caracteres';
         return '';
       
+      case 'phone':
+        if (value && !phoneRegex.test(value)) 
+          return 'Formato de teléfono inválido. Ejemplo: +1234567890';
+        return '';
+      
       default:
         return '';
     }
@@ -81,7 +85,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       [name]: value
     }));
     
-    // Validación en tiempo real
     const error = validateField(name, value);
     setFieldErrors(prev => ({
       ...prev,
@@ -94,16 +97,15 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {};
     
-    // Validar todos los campos requeridos
     errors.firstName = validateField('firstName', formData.firstName);
     errors.lastName = validateField('lastName', formData.lastName);
     errors.email = validateField('email', formData.email);
     errors.password = validateField('password', formData.password);
     errors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
+    errors.phone = validateField('phone', formData.phone);
     
     setFieldErrors(errors);
     
-    // Verificar si hay algún error
     return !Object.values(errors).some(error => error !== '');
   };
 
@@ -111,7 +113,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
     e.preventDefault();
     setLocalError('');
 
-    // Validar todo el formulario
     if (!validateForm()) {
       setLocalError('Por favor corrige los errores en el formulario');
       return;
@@ -123,11 +124,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        // phone: formData.phone // Omitido temporalmente por bug en backend
+        phone: formData.phone || undefined,
       });
-      
-      // El hook se encarga del login automático y redirección a verificación
-      // onClose() se llamará automáticamente
       
     } catch (err) {
       console.log('Error en el formulario de registro:', err);
@@ -142,7 +140,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Función para mostrar requisitos de contraseña
   const PasswordRequirements = () => (
     <Box className="mt-1 p-2 bg-blue-50 rounded-lg">
       <Typography variant="caption" className="text-blue-800 font-semibold block mb-1">
@@ -170,7 +167,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
 
   return (
     <Box className="w-80 max-w-sm">
-      {/* Header */}
       <Box className="flex justify-between items-center mb-6">
         <Box className="flex items-center gap-2">
           <IconButton
@@ -196,14 +192,12 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
       </Box>
 
       <form onSubmit={handleSubmit}>
-        {/* Mostrar errores */}
         {(error || localError) && (
           <Alert severity="error" className="mb-4">
             {error || localError}
           </Alert>
         )}
 
-        {/* Campos del formulario */}
         <Box className="grid grid-cols-2 gap-3 mb-4">
           <TextField
             fullWidth
@@ -247,8 +241,6 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           helperText={fieldErrors.email}
         />
 
-        {/* Teléfono comentado temporalmente */}
-        {/*
         <TextField
           fullWidth
           label="Teléfono (opcional)"
@@ -259,8 +251,9 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           className="mb-4"
           placeholder="+1234567890"
           disabled={loading}
+          error={!!fieldErrors.phone}
+          helperText={fieldErrors.phone || "Ejemplo: +1234567890 o 1234567890"}
         />
-        */}
 
         <Box className="mb-3">
           <TextField
@@ -322,32 +315,42 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           }}
         />
 
-        {/* Términos y condiciones */}
-        <Box className="text-center mb-4">
+        <Box className="mb-4">
           <Typography variant="body2" className="text-gray-600">
             Al crear una cuenta, aceptas nuestros{' '}
-            <Button variant="text" size="small" className="text-blue-900 p-0 min-w-0" disabled={loading}>
-              Términos y Condiciones
+            <Button 
+              variant="text" 
+              size="small" 
+              className="text-blue-900 p-0 min-w-0" 
+              disabled={loading}
+              style={{ textTransform: 'none' }}
+            >
+              Términos y condiciones
             </Button>{' '}
             y la{' '}
-            <Button variant="text" size="small" className="text-blue-900 p-0 min-w-0" disabled={loading}>
-              Política de Privacidad
+            <Button 
+              variant="text" 
+              size="small" 
+              className="text-blue-900 p-0 min-w-0" 
+              disabled={loading}
+              style={{ textTransform: 'none' }}
+            >
+              Política de privacidad
             </Button>
           </Typography>
         </Box>
 
-        {/* Botón de registro */}
         <Button
           type="submit"
           variant="contained"
           fullWidth
           disabled={loading}
           className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mb-4 disabled:bg-gray-400"
+          style={{ textTransform: 'none' }}
         >
           {loading ? 'Creando Cuenta...' : 'Crear Cuenta'}
         </Button>
 
-        {/* Divisor */}
         <Box className="flex items-center mb-4">
           <Divider className="flex-1" />
           <Typography variant="body2" className="mx-2 text-gray-500">
@@ -356,8 +359,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
           <Divider className="flex-1" />
         </Box>
 
-        {/* Volver a login */}
-        <Box className="text-center">
+        <Box>
           <Typography variant="body2" className="text-gray-600 mb-2">
             ¿Ya tienes una cuenta?
           </Typography>
@@ -367,13 +369,13 @@ export default function RegisterForm({ onClose, onSwitchToLogin }: RegisterFormP
             onClick={onSwitchToLogin}
             disabled={loading}
             className="border-blue-900 text-blue-900 hover:bg-blue-50 disabled:border-gray-400 disabled:text-gray-400"
+            style={{ textTransform: 'none' }}
           >
             Iniciar Sesión
           </Button>
         </Box>
 
-        {/* Información sobre verificación */}
-        <Box className="text-center mt-4 pt-4 border-t border-gray-200">
+        <Box className="mt-4 pt-4 border-t border-gray-200">
           <Typography variant="body2" className="text-gray-600">
             Después del registro, serás redirigido al login para iniciar sesión y luego verificar tu cuenta.
           </Typography>
