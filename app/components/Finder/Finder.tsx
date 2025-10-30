@@ -5,6 +5,8 @@ import { SyntheticEvent } from "react";
 import Image from "next/image";
 import FinderForm from "./FinderForm";
 
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -107,6 +109,12 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             {...a11yProps(5)}
           />
           <Tab
+            label="Traslados"
+            icon={<DirectionsBusIcon sx={{ fontSize: 35 }} />}
+            iconPosition="top"
+            {...a11yProps(9)}
+          />
+          <Tab
             label="Vuelos"
             icon={<Image src="/images/icons/icon vuelos.png" width={35} height={35} alt="Vuelos" />}
             iconPosition="top"
@@ -149,6 +157,10 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
 
       <CustomTabPanel value={value} index={5}>
         <FinderForm tipoViaje="carros" onBuscar={onBuscar} />
+      </CustomTabPanel>
+      
+      <CustomTabPanel value={value} index={9}>
+        <FinderForm tipoViaje="traslados" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={6}>
