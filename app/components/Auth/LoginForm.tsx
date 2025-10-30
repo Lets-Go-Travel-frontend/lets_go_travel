@@ -52,6 +52,11 @@ export default function LoginForm({
     router.push('/auth/forgot-password');
   };
 
+  const handleAgencyRegistration = () => {
+    onClose(); // Cerrar el popover
+    router.push('/auth/register-agent'); // Redirigir a la página de registro de agente
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit} className="space-y-4">
       <Typography variant="h5" className="text-blue-900 font-bold text-center">
@@ -128,7 +133,7 @@ export default function LoginForm({
           <Link
             component="button"
             type="button"
-            onClick={onSwitchToAgency}
+            onClick={handleAgencyRegistration} 
             className="text-blue-900 hover:underline text-sm"
           >
             ¿Eres una agencia? Acceso B2B

@@ -10,7 +10,40 @@ import {
   forgotPassword,
   refreshToken,
   OperationType,
+  registerAgent as apiRegisterAgent,
+  RegisterAgentData,
 } from "@/lib/api/auth";
+
+// Interfaces para los tipos de respuesta
+interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    user_id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    user_type: string;
+    email_verified: boolean;
+  };
+}
+
+interface UserInfo {
+  email: string;
+  firstName: string;
+  lastName: string;
+  userId: string;
+  userType: string;
+  emailVerified: boolean;
+  needsVerification?: boolean;
+  verifiedAt?: string;
+}
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
@@ -23,12 +56,12 @@ export function useAuth() {
     firstName: string;
     lastName: string;
     phone?: string;
-  }) => {
+  }): Promise<ApiResponse> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await registerUser(data);
+      const response: ApiResponse = await registerUser(data);
 
       if (response.success) {
         await login({
@@ -38,6 +71,7 @@ export function useAuth() {
 
         return response;
       }
+      return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
@@ -53,18 +87,19 @@ export function useAuth() {
       password: string;
     },
     onSuccess?: () => void
-  ) => {
+  ): Promise<ApiResponse<AuthResponse>> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await loginUser(data);
+      const response: ApiResponse<AuthResponse> = await loginUser(data);
 
       if (response.success) {
         const accessToken = response.data?.access_token;
         const userData = response.data?.user;
+        const refreshToken = response.data?.refresh_token;
 
-        if (accessToken && userData) {
+        if (accessToken && userData && refreshToken) {
           sessionStorage.setItem("pending_verification_token", accessToken);
           sessionStorage.setItem("pending_verification_email", data.email);
           sessionStorage.setItem("pending_user_data", JSON.stringify(userData));
@@ -74,7 +109,7 @@ export function useAuth() {
               `/auth/verify?email=${encodeURIComponent(data.email)}&access_token=${encodeURIComponent(accessToken)}`
             );
           } else {
-            const userInfo = {
+            const userInfo: UserInfo = {
               email: userData.email,
               firstName: userData.first_name,
               lastName: userData.last_name,
@@ -86,7 +121,7 @@ export function useAuth() {
 
             localStorage.setItem("current_user", JSON.stringify(userInfo));
             localStorage.setItem("access_token", accessToken);
-            localStorage.setItem("refresh_token", response.data.refresh_token);
+            localStorage.setItem("refresh_token", refreshToken);
 
             if (onSuccess) {
               onSuccess();
@@ -94,6 +129,8 @@ export function useAuth() {
 
             router.push("/");
           }
+        } else {
+          throw new Error("Invalid response data from server");
         }
 
         return response;
@@ -129,12 +166,12 @@ export function useAuth() {
     }
   };
 
-  const verify = async (data: { access_token: string; email: string; code: string }) => {
+  const verify = async (data: { access_token: string; email: string; code: string }): Promise<ApiResponse> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await verifyUser({
+      const response: ApiResponse = await verifyUser({
         access_token: data.access_token,
         email: data.email,
         code: data.code,
@@ -148,7 +185,7 @@ export function useAuth() {
         if (pendingUserData && pendingToken) {
           const userData = JSON.parse(pendingUserData);
 
-          const userInfo = {
+          const userInfo: UserInfo = {
             email: userData.email,
             firstName: userData.first_name,
             lastName: userData.last_name,
@@ -182,12 +219,12 @@ export function useAuth() {
     }
   };
 
-  const requestPasswordReset = async (email: string) => {
+  const requestPasswordReset = async (email: string): Promise<ApiResponse> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await refreshToken({
+      const response: ApiResponse = await refreshToken({
         email: email,
         operation: OperationType.FORGOT_PASSWORD,
       });
@@ -207,13 +244,12 @@ export function useAuth() {
     }
   };
 
-  const resetPassword = async (data: { email: string; code: string; new_password: string }) => {
+  const resetPassword = async (data: { email: string; code: string; new_password: string }): Promise<ApiResponse> => {
     setLoading(true);
     setError(null);
 
     try {
-      // Usar el endpoint /verify con operation_type: 'forgot_password'
-      const response = await verifyUser({
+      const response: ApiResponse = await verifyUser({
         email: data.email,
         code: data.code,
         new_password: data.new_password,
@@ -221,7 +257,6 @@ export function useAuth() {
       });
 
       if (response.success) {
-        // Limpiar storage después del reset exitoso
         sessionStorage.removeItem("reset_password_email");
         sessionStorage.removeItem("reset_code_verified");
         sessionStorage.removeItem("reset_code");
@@ -238,14 +273,14 @@ export function useAuth() {
     }
   };
 
-  const changePassword = async (data: { current_password: string; new_password: string }) => {
+  const changePassword = async (data: { current_password: string; new_password: string }): Promise<ApiResponse> => {
     setLoading(true);
     setError(null);
 
     try {
       const refreshTokenValue = localStorage.getItem("refresh_token");
 
-      const response = await refreshToken({
+      const response: ApiResponse = await refreshToken({
         refresh_token: refreshTokenValue || undefined,
         current_password: data.current_password,
         new_password: data.new_password,
@@ -266,14 +301,14 @@ export function useAuth() {
     }
   };
 
-  const resendVerification = async () => {
+  const resendVerification = async (): Promise<ApiResponse> => {
     setLoading(true);
     setError(null);
 
     try {
       const refreshTokenValue = localStorage.getItem("refresh_token");
 
-      const response = await refreshToken({
+      const response: ApiResponse = await refreshToken({
         refresh_token: refreshTokenValue || undefined,
         resend_verification: "True",
         operation: OperationType.TOKEN_REFRESH,
@@ -293,16 +328,18 @@ export function useAuth() {
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await logoutUser();
+      const response: ApiResponse = await logoutUser();
 
       if (response.success) {
+        // Logout exitoso
       }
     } catch (err) {
+      // Ignorar errores en logout para asegurar limpieza
     } finally {
       localStorage.removeItem("current_user");
       localStorage.removeItem("access_token");
@@ -319,7 +356,29 @@ export function useAuth() {
     }
   };
 
-  const getCurrentUser = () => {
+  const registerAgent = async (data: RegisterAgentData): Promise<ApiResponse> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response: ApiResponse = await apiRegisterAgent(data);
+      
+      if (response.success) {
+        router.push('/auth/login');
+        return response;
+      } else {
+        throw new Error(response.message || 'Agent registration failed');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Agent registration failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCurrentUser = (): UserInfo | null => {
     if (typeof window !== "undefined") {
       const user = localStorage.getItem("current_user");
       return user ? JSON.parse(user) : null;
@@ -327,26 +386,26 @@ export function useAuth() {
     return null;
   };
 
-  const getAccessToken = () => {
+  const getAccessToken = (): string | null => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("access_token");
     }
     return null;
   };
 
-  const isUserVerified = () => {
+  const isUserVerified = (): boolean => {
     const user = getCurrentUser();
-    return user && user.emailVerified;
+    return user ? user.emailVerified : false;
   };
 
-  const hasPendingVerification = () => {
+  const hasPendingVerification = (): boolean => {
     if (typeof window !== "undefined") {
       return !!sessionStorage.getItem("pending_verification_token");
     }
     return false;
   };
 
-  const getPendingVerificationData = () => {
+  const getPendingVerificationData = (): { token: string | null; email: string | null; userData: any } => {
     if (typeof window !== "undefined") {
       const token = sessionStorage.getItem("pending_verification_token");
       const email = sessionStorage.getItem("pending_verification_email");
@@ -358,7 +417,7 @@ export function useAuth() {
         userData: userData ? JSON.parse(userData) : null,
       };
     }
-    return null;
+    return { token: null, email: null, userData: null };
   };
 
   return {
@@ -370,6 +429,7 @@ export function useAuth() {
     resetPassword,
     changePassword,
     resendVerification,
+    registerAgent,
     getCurrentUser,
     getAccessToken,
     isUserVerified,

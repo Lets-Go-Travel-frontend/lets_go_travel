@@ -76,7 +76,7 @@ export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverPr
         </IconButton>
         
         <Typography variant="h6" className="text-blue-900 font-bold mb-4 pr-8 text-lg md:text-xl">
-          Registro de Agencia
+          Registssro de Agencia
         </Typography>
         
         <div className={isMobile ? "max-h-[60vh] overflow-y-auto" : ""}>
