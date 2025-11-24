@@ -7,6 +7,7 @@ import FinderForm from "./FinderForm";
 import FinderFormTraslados from "./FinderFormTraslados";
 import FinderFormAlojamientos from "./FinderFormAlojamientos";
 import FinderFormPaquetes from "./FinderFormPaquetes";
+import FinderFormExcursiones from "./FinderFormExcursiones";
 
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
@@ -151,7 +152,7 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={3}>
-        <FinderForm tipoViaje="excursiones" onBuscar={onBuscar} />
+        <FinderFormExcursiones tipoViaje="excursiones" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={4}>
