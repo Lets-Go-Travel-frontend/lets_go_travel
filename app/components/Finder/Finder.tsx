@@ -6,6 +6,7 @@ import Image from "next/image";
 import FinderForm from "./FinderForm";
 import FinderFormTraslados from "./FinderFormTraslados";
 import FinderFormAlojamientos from "./FinderFormAlojamientos";
+import FinderFormPaquetes from "./FinderFormPaquetes";
 
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
@@ -142,7 +143,7 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
       </CustomTabPanel>
      
       <CustomTabPanel value={value} index={1}>
-        <FinderForm tipoViaje="paquetes" onBuscar={onBuscar} />
+        <FinderFormPaquetes tipoViaje="paquetes" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={2}>
