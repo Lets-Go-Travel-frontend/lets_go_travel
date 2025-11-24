@@ -5,6 +5,7 @@ import { SyntheticEvent } from "react";
 import Image from "next/image";
 import FinderForm from "./FinderForm";
 import FinderFormTraslados from "./FinderFormTraslados";
+import FinderFormAlojamientos from "./FinderFormAlojamientos";
 
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
@@ -153,7 +154,7 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={4}>
-        <FinderForm tipoViaje="alojamientos" onBuscar={onBuscar} />
+        <FinderFormAlojamientos tipoViaje="alojamientos" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={5}>
