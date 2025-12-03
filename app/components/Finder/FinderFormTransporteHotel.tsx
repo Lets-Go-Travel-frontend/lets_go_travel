@@ -1,4 +1,3 @@
-// components/FinderForm/FinderForm.tsx
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import { 
@@ -7,44 +6,39 @@ import {
   Typography, 
   TextField, 
   InputAdornment, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Select, 
+  MenuItem,
   useMediaQuery,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   IconButton,
   Popover
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
-import PeopleIcon from "@mui/icons-material/People";
 import SearchIcon from "@mui/icons-material/Search";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FlagIcon from "@mui/icons-material/Flag";
+import HotelIcon from "@mui/icons-material/Hotel";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
+import FlightLandIcon from "@mui/icons-material/FlightLand";
 
-import { GuestsSelector } from "./index";
+import RoomsGuestsSelector from "./RoomsGuestsSelector";
 
 interface FinderFormProps {
   tipoViaje: string;
   onBuscar?: () => void;
 }
 
-export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
+export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: FinderFormProps) {
   const isMobile = useMediaQuery('(max-width:900px)');
-
-  const [tipoAlojamiento, setTipoAlojamiento] = useState("un-alojamiento");
-  const [nacionalidad, setNacionalidad] = useState("");
-  const [destino, setDestino] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
   
-  // Estado para el selector de huéspedes
-  const [guestsAnchorEl, setGuestsAnchorEl] = useState<null | HTMLElement>(null);
-  const [guests, setGuests] = useState({
+  const [nacionalidad, setNacionalidad] = useState("");
+  const [clase, setClase] = useState("");
+  const [origen, setOrigen] = useState("");
+  const [destino, setDestino] = useState("");
+  const [fechaSalida, setFechaSalida] = useState("");
+  const [fechaVuelta, setFechaVuelta] = useState("");
+  const [roomsGuestsAnchorEl, setRoomsGuestsAnchorEl] = useState<null | HTMLElement>(null);
+  const [roomsGuests, setRoomsGuests] = useState({
+    habitaciones: 1,
     adultos: 2,
     niños12_17: 0,
     niños2_11: 0,
@@ -52,20 +46,20 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
   });
 
   const handleBuscar = () => {
-    console.log('Búsqueda de alojamiento realizada:', { 
-      tipoAlojamiento,
+    console.log('Búsqueda de Transporte+Hotel realizada:', { 
       nacionalidad, 
-      destino, 
-      checkIn,
-      checkOut,
-      guests
+      clase,
+      origen,
+      destino,
+      fechaSalida,
+      fechaVuelta,
+      roomsGuests
     });
     if (onBuscar) {
       onBuscar();
     }
   };
 
-  // Función para formatear la fecha en un placeholder personalizado
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
     const date = new Date(dateString);
@@ -76,102 +70,37 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
     });
   };
 
-  // Funciones para el selector de huéspedes
-  const handleGuestsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setGuestsAnchorEl(event.currentTarget);
+  const handleRoomsGuestsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setRoomsGuestsAnchorEl(event.currentTarget);
   };
 
-  const handleGuestsClose = () => {
-    setGuestsAnchorEl(null);
+  const handleRoomsGuestsClose = () => {
+    setRoomsGuestsAnchorEl(null);
   };
 
-  const handleGuestsChange = (newGuests: typeof guests) => {
-    setGuests(newGuests);
+  const handleRoomsGuestsChange = (newRoomsGuests: typeof roomsGuests) => {
+    setRoomsGuests(newRoomsGuests);
   };
 
-  // Calcular el total de huéspedes
-  const totalGuests = guests.adultos + guests.niños12_17 + guests.niños2_11;
-  const displayGuests = totalGuests === 0 ? "Seleccionar" : 
-    `${totalGuests} ${totalGuests === 1 ? 'huésped' : 'huéspedes'}${guests.infantes > 0 ? `, ${guests.infantes} ${guests.infantes === 1 ? 'infante' : 'infantes'}` : ''}`;
+  // Calcular total de personas
+  const totalPersonas = roomsGuests.adultos + roomsGuests.niños12_17 + roomsGuests.niños2_11 + roomsGuests.infantes;
+  const displayRoomsGuests = `${roomsGuests.habitaciones} ${roomsGuests.habitaciones === 1 ? 'habitación' : 'habitaciones'}, ${totalPersonas} ${totalPersonas === 1 ? 'persona' : 'personas'}`;
 
   return (
     <Box className="flex flex-col items-center w-full">
+      {/* Fila 1: Nacionalidad y Clase */}
       <Box className="mb-3 w-full max-w-6xl">
         <Stack 
           direction={isMobile ? "column" : "row"} 
           spacing={isMobile ? 2 : 2} 
           alignItems={isMobile ? "stretch" : "flex-end"}
+          justifyContent="flex-end"
           className="w-full"
         >
-          <Box className={isMobile ? "w-full" : "flex-1"}>
-            <FormControl component="fieldset" className="w-full">
-              <RadioGroup
-                row
-                value={tipoAlojamiento}
-                onChange={(e) => setTipoAlojamiento(e.target.value)}
-                className="flex gap-1"
-              >
-                <FormControlLabel 
-                  value="un-alojamiento" 
-                  control={
-                    <Radio 
-                      size="small"
-                      className="text-orange-500"
-                      sx={{
-                        '&.Mui-checked': {
-                          color: 'rgb(249 115 22)',
-                        },
-                        padding: '4px', 
-                        '& .MuiSvgIcon-root': {
-                          fontSize: '18px', 
-                        }
-                      }}
-                    />
-                  } 
-                  label={
-                    <Typography className="text-white font-semibold text-xs md:text-sm whitespace-nowrap">
-                      Un alojamiento
-                    </Typography>
-                  } 
-                  sx={{
-                    marginRight: '8px', 
-                  }}
-                />
-                <FormControlLabel 
-                  value="multiples-alojamientos" 
-                  control={
-                    <Radio 
-                      size="small"
-                      className="text-orange-500"
-                      sx={{
-                        '&.Mui-checked': {
-                          color: 'rgb(249 115 22)',
-                        },
-                        padding: '4px', 
-                        '& .MuiSvgIcon-root': {
-                          fontSize: '18px',
-                        }
-                      }}
-                    />
-                  } 
-                  label={
-                    <Typography className="text-white font-semibold text-xs md:text-sm whitespace-nowrap">
-                      Múltiples alojamientos
-                    </Typography>
-                  } 
-                  sx={{
-                    marginLeft: '0px', 
-                  }}
-                />
-              </RadioGroup>
-            </FormControl>
-          </Box>
-
-          {/* Nacionalidad - Más pequeño */}
-          <Box className={isMobile ? "w-full" : ""} sx={{ 
-            width: isMobile ? '100%' : 'auto',
-            minWidth: isMobile ? '100%' : '180px',
-            maxWidth: isMobile ? '100%' : '220px'
+          {/* Nacionalidad */}
+          <Box className={isMobile ? "w-full" : "flex-1"} sx={{ 
+            minWidth: isMobile ? '100%' : '200px',
+            maxWidth: isMobile ? '100%' : '250px'
           }}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               NACIONALIDAD
@@ -204,18 +133,73 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
               <MenuItem value="it">Italia</MenuItem>
             </TextField>
           </Box>
+
+          {/* Clase */}
+          <Box className={isMobile ? "w-full" : "flex-1"} sx={{ 
+            minWidth: isMobile ? '100%' : '200px',
+            maxWidth: isMobile ? '100%' : '250px'
+          }}>
+            <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
+              CLASE
+            </Typography>
+            <TextField
+              select
+              fullWidth
+              value={clase}
+              onChange={(e) => setClase(e.target.value)}
+              variant="outlined"
+              size="small"
+              className="bg-white rounded-lg"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <HotelIcon fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value="economy">Económica</MenuItem>
+              <MenuItem value="business">Ejecutiva</MenuItem>
+              <MenuItem value="first">Primera Clase</MenuItem>
+              <MenuItem value="premium">Premium</MenuItem>
+              <MenuItem value="luxury">Lujo</MenuItem>
+            </TextField>
+          </Box>
         </Stack>
       </Box>
 
-      <Box className="w-full max-w-6xl">
+      {/* Fila 2: Origen y Destino */}
+      <Box className="mb-3 w-full max-w-6xl">
         <Stack 
           direction={isMobile ? "column" : "row"} 
           spacing={isMobile ? 2 : 2} 
-          alignItems={isMobile ? "stretch" : "flex-end"}
           className="w-full"
         >
-          {/* Destino - MÁS GRANDE */}
-          <Box className={isMobile ? "w-full" : "flex-2"}> {/* flex-2 para más ancho */}
+          {/* Origen */}
+          <Box className={isMobile ? "w-full" : "flex-1"}>
+            <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
+              ORIGEN
+            </Typography>
+            <TextField
+              fullWidth
+              value={origen}
+              onChange={(e) => setOrigen(e.target.value)}
+              placeholder="Ciudad o aeropuerto..."
+              variant="outlined"
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FlightTakeoffIcon fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              className="bg-white rounded-lg"
+            />
+          </Box>
+          
+          {/* Destino */}
+          <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               DESTINO
             </Typography>
@@ -223,36 +207,41 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
               fullWidth
               value={destino}
               onChange={(e) => setDestino(e.target.value)}
-              placeholder="Ciudad, región, hotel o dirección..."
+              placeholder="Ciudad o aeropuerto..."
               variant="outlined"
               size="small"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LocationOnIcon fontSize="small" color="action" />
+                    <FlightLandIcon fontSize="small" color="action" />
                   </InputAdornment>
                 ),
               }}
               className="bg-white rounded-lg"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  paddingRight: '8px',
-                }
-              }}
             />
           </Box>
+        </Stack>
+      </Box>
 
-          {/* Check-In */}
+      {/* Fila 3: Fechas, Habitaciones/Personas y Buscar */}
+      <Box className="w-full max-w-6xl">
+        <Stack 
+          direction={isMobile ? "column" : "row"} 
+          spacing={isMobile ? 2 : 2} 
+          alignItems={isMobile ? "stretch" : "flex-end"}
+          className="w-full"
+        >
+          {/* Fecha de Salida */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
-              CHECK-IN
+              FECHA DE SALIDA
             </Typography>
             <Box sx={{ position: 'relative' }}>
               <TextField
                 fullWidth
                 type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
+                value={fechaSalida}
+                onChange={(e) => setFechaSalida(e.target.value)}
                 variant="outlined"
                 size="small"
                 className="bg-white rounded-lg"
@@ -301,26 +290,26 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                   transform: 'translateY(-50%)',
                   zIndex: 1,
                   pointerEvents: 'none',
-                  color: checkIn ? '#000' : 'rgba(0, 0, 0, 0.6)',
+                  color: fechaSalida ? '#000' : 'rgba(0, 0, 0, 0.6)',
                   fontSize: '0.875rem',
                 }}
               >
-                {formatDateForDisplay(checkIn)}
+                {formatDateForDisplay(fechaSalida)}
               </Box>
             </Box>
           </Box>
 
-          {/* Check-Out */}
+          {/* Fecha de Vuelta */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
-              CHECK-OUT
+              FECHA DE VUELTA
             </Typography>
             <Box sx={{ position: 'relative' }}>
               <TextField
                 fullWidth
                 type="date"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
+                value={fechaVuelta}
+                onChange={(e) => setFechaVuelta(e.target.value)}
                 variant="outlined"
                 size="small"
                 className="bg-white rounded-lg"
@@ -369,24 +358,24 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                   transform: 'translateY(-50%)',
                   zIndex: 1,
                   pointerEvents: 'none',
-                  color: checkOut ? '#000' : 'rgba(0, 0, 0, 0.6)',
+                  color: fechaVuelta ? '#000' : 'rgba(0, 0, 0, 0.6)',
                   fontSize: '0.875rem',
                 }}
               >
-                {formatDateForDisplay(checkOut)}
+                {formatDateForDisplay(fechaVuelta)}
               </Box>
             </Box>
           </Box>
 
-          {/* Huéspedes - Ahora con popover */}
+          {/* Seleccionar habitaciones y personas */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
-              HUÉSPEDES
+              HABITACIONES Y PERSONAS
             </Typography>
             <Button
               fullWidth
               variant="outlined"
-              onClick={handleGuestsClick}
+              onClick={handleRoomsGuestsClick}
               className="bg-white rounded-lg text-left justify-start normal-case"
               sx={{
                 borderColor: 'rgba(0, 0, 0, 0.23)',
@@ -398,16 +387,10 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 }
               }}
               endIcon={<ArrowDropDownIcon />}
-              startIcon={
-                totalGuests === 1 ? (
-                  <PersonIcon fontSize="small" color="action" />
-                ) : (
-                  <PeopleIcon fontSize="small" color="action" />
-                )
-              }
+              startIcon={<PersonIcon fontSize="small" color="action" />}
             >
               <Typography className="text-sm truncate">
-                {displayGuests}
+                {displayRoomsGuests}
               </Typography>
             </Button>
           </Box>
@@ -433,11 +416,11 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
         </Stack>
       </Box>
 
-      {/* Popover para selector de huéspedes */}
+      {/* Popover para selector de habitaciones y personas */}
       <Popover
-        open={Boolean(guestsAnchorEl)}
-        anchorEl={guestsAnchorEl}
-        onClose={handleGuestsClose}
+        open={Boolean(roomsGuestsAnchorEl)}
+        anchorEl={roomsGuestsAnchorEl}
+        onClose={handleRoomsGuestsClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: isMobile ? 'center' : 'left',
@@ -451,7 +434,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             mt: 1,
             borderRadius: '12px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-            minWidth: isMobile ? '90vw' : '320px',
+            minWidth: isMobile ? '90vw' : '350px',
             maxWidth: isMobile ? '95vw' : '400px',
             width: isMobile ? 'auto' : undefined,
             mx: isMobile ? 2 : 0,
@@ -459,18 +442,11 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             overflow: 'auto',
           }
         }}
-        sx={{
-          '& .MuiPopover-paper': {
-            margin: isMobile ? 'auto' : undefined,
-            left: isMobile ? '50%' : undefined,
-            transform: isMobile ? 'translateX(-50%)' : undefined,
-          }
-        }}
       >
-        <GuestsSelector
-          guests={guests}
-          onChange={handleGuestsChange}
-          onClose={handleGuestsClose}
+        <RoomsGuestsSelector
+          roomsGuests={roomsGuests}
+          onChange={handleRoomsGuestsChange}
+          onClose={handleRoomsGuestsClose}
           isMobile={isMobile}
         />
       </Popover>

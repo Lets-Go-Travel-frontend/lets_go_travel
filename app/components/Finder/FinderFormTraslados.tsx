@@ -18,7 +18,7 @@ FormControlLabel
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
-import PeopleIcon from "@mui/icons-material/People"; // Nuevo ícono para múltiples personas
+import PeopleIcon from "@mui/icons-material/People"; 
 import SearchIcon from "@mui/icons-material/Search";
 import FlightLandIcon from "@mui/icons-material/FlightLand";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
@@ -398,7 +398,7 @@ return (
         {/* Cantidad de Pasajeros */}
         <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
-            PASAJEROS
+            HUÉSPEDES
             </Typography>
             <FormControl fullWidth size="small" className="bg-white rounded-lg">
             <Select
