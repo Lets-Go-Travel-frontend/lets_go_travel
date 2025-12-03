@@ -76,24 +76,24 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             },
           }}
         >
-          <Tab
+          {/* <Tab
             label="Ofertas"
             icon={<Image src="/images/icons/icon ofertas.png" width={35} height={35} alt="Ofertas" />}
             iconPosition="top"
             {...a11yProps(0)}
-          />
+          /> */}
           <Tab
             label="Paquetes"
             icon={<Image src="/images/icons/icon paquetes.png" width={35} height={35} alt="Paquetes" />}
             iconPosition="top"
             {...a11yProps(1)}
           />
-          <Tab
+          {/* <Tab
             label="Destinos"
             icon={<Image src="/images/icons/icon destinos.png" width={35} height={35} alt="Destinos" />}
             iconPosition="top"
             {...a11yProps(2)}
-          />
+          /> */}
           <Tab
             label="Excursiones"
             icon={<Image src="/images/icons/icon excursiones.png" width={35} height={35} alt="Excursiones" />}
@@ -118,18 +118,18 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             iconPosition="top"
             {...a11yProps(9)}
           />
-          <Tab
+          {/* <Tab
             label="Vuelos"
             icon={<Image src="/images/icons/icon vuelos.png" width={35} height={35} alt="Vuelos" />}
             iconPosition="top"
             {...a11yProps(6)}
-          />
-          <Tab
+          /> */}
+          {/* <Tab
             label="Alquiler"
             icon={<Image src="/images/icons/icon alquileres.png" width={35} height={35} alt="Alquiler" />}
             iconPosition="top"
             {...a11yProps(7)}
-          />
+          /> */}
           <Tab
             label="Eventos"
             icon={<Image src="/images/icons/icon eventos.png" width={35} height={35} alt="Eventos" />}
@@ -139,46 +139,46 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
         </Tabs>
       </Box>
       
-      <CustomTabPanel value={value} index={0}>
+      {/* <CustomTabPanel value={value} index={0}>
         <FinderForm tipoViaje="ofertas" onBuscar={onBuscar} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
      
-      <CustomTabPanel value={value} index={1}>
+      <CustomTabPanel value={value} index={0}>
         <FinderFormPaquetes tipoViaje="paquetes" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      <CustomTabPanel value={value} index={2}>
+      {/* <CustomTabPanel value={value} index={2}>
         <FinderForm tipoViaje="destinos" onBuscar={onBuscar} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
 
-      <CustomTabPanel value={value} index={3}>
+      <CustomTabPanel value={value} index={1}>
         <FinderFormExcursiones tipoViaje="excursiones" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      <CustomTabPanel value={value} index={4}>
+      <CustomTabPanel value={value} index={2}>
         <FinderFormAlojamientos tipoViaje="alojamientos" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      <CustomTabPanel value={value} index={5}>
+      {/* <CustomTabPanel value={value} index={5}>
         <FinderForm tipoViaje="carros" onBuscar={onBuscar} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
       
 
-      <CustomTabPanel value={value} index={6}>
+      <CustomTabPanel value={value} index={3}>
         <FinderFormTraslados tipoViaje="traslados" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      <CustomTabPanel value={value} index={7}>
+      {/* <CustomTabPanel value={value} index={7}>
         <FinderForm tipoViaje="vuelos" onBuscar={onBuscar} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
 
-      <CustomTabPanel value={value} index={8}>
+      {/* <CustomTabPanel value={value} index={8}>
         <FinderForm tipoViaje="alquileres" onBuscar={onBuscar} />
       </CustomTabPanel>
       
       <CustomTabPanel value={value} index={9}>
         <FinderForm tipoViaje="eventos" onBuscar={onBuscar} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
     
     </Box>
   );
