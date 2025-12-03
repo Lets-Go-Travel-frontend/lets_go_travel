@@ -20,12 +20,13 @@ import {
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
+import PeopleIcon from "@mui/icons-material/People"; // Nuevo ícono para múltiples personas
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FlagIcon from "@mui/icons-material/Flag";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-import { GuestsSelector } from "./index";;
+import { GuestsSelector } from "./index";
 
 interface FinderFormProps {
   tipoViaje: string;
@@ -89,9 +90,9 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
   };
 
   // Calcular el total de huéspedes
-  const totalGuests = guests.adultos + guests.niños12_17 + guests.niños2_11 + guests.infantes;
+  const totalGuests = guests.adultos + guests.niños12_17 + guests.niños2_11;
   const displayGuests = totalGuests === 0 ? "Seleccionar" : 
-    `${totalGuests} ${totalGuests === 1 ? 'huésped' : 'huéspedes'}`;
+    `${totalGuests} ${totalGuests === 1 ? 'huésped' : 'huéspedes'}${guests.infantes > 0 ? `, ${guests.infantes} ${guests.infantes === 1 ? 'infante' : 'infantes'}` : ''}`;
 
   return (
     <Box className="flex flex-col items-center w-full">
@@ -397,7 +398,13 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 }
               }}
               endIcon={<ArrowDropDownIcon />}
-              startIcon={<PersonIcon fontSize="small" color="action" />}
+              startIcon={
+                totalGuests === 1 ? (
+                  <PersonIcon fontSize="small" color="action" />
+                ) : (
+                  <PeopleIcon fontSize="small" color="action" />
+                )
+              }
             >
               <Typography className="text-sm truncate">
                 {displayGuests}
@@ -428,45 +435,45 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
 
       {/* Popover para selector de huéspedes */}
       <Popover
-    open={Boolean(guestsAnchorEl)}
-    anchorEl={guestsAnchorEl}
-    onClose={handleGuestsClose}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: isMobile ? 'center' : 'left',
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: isMobile ? 'center' : 'left',
-    }}
-    PaperProps={{
-      sx: {
-        mt: 1,
-        borderRadius: '12px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-        minWidth: isMobile ? '90vw' : '320px',
-        maxWidth: isMobile ? '95vw' : '400px',
-        width: isMobile ? 'auto' : undefined,
-        mx: isMobile ? 2 : 0,
-        maxHeight: isMobile ? '80vh' : 'auto',
-        overflow: 'auto',
-      }
-    }}
-    sx={{
-      '& .MuiPopover-paper': {
-        margin: isMobile ? 'auto' : undefined,
-        left: isMobile ? '50%' : undefined,
-        transform: isMobile ? 'translateX(-50%)' : undefined,
-      }
-    }}
-  >
-    <GuestsSelector
-      guests={guests}
-      onChange={handleGuestsChange}
-      onClose={handleGuestsClose}
-      isMobile={isMobile} // Pasamos la prop isMobile
-    />
-  </Popover>
+        open={Boolean(guestsAnchorEl)}
+        anchorEl={guestsAnchorEl}
+        onClose={handleGuestsClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: isMobile ? 'center' : 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: isMobile ? 'center' : 'left',
+        }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            minWidth: isMobile ? '90vw' : '320px',
+            maxWidth: isMobile ? '95vw' : '400px',
+            width: isMobile ? 'auto' : undefined,
+            mx: isMobile ? 2 : 0,
+            maxHeight: isMobile ? '80vh' : 'auto',
+            overflow: 'auto',
+          }
+        }}
+        sx={{
+          '& .MuiPopover-paper': {
+            margin: isMobile ? 'auto' : undefined,
+            left: isMobile ? '50%' : undefined,
+            transform: isMobile ? 'translateX(-50%)' : undefined,
+          }
+        }}
+      >
+        <GuestsSelector
+          guests={guests}
+          onChange={handleGuestsChange}
+          onClose={handleGuestsClose}
+          isMobile={isMobile}
+        />
+      </Popover>
     </Box>
   );
 }

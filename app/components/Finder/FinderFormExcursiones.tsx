@@ -16,6 +16,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonIcon from "@mui/icons-material/Person";
+import PeopleIcon from "@mui/icons-material/People"; // Nuevo ícono para múltiples personas
 
 interface FinderFormProps {
   tipoViaje: string;
@@ -40,6 +41,17 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
     if (onBuscar) {
       onBuscar();
     }
+  };
+
+  // Función para formatear la fecha en un placeholder personalizado
+  const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return "Seleccionar fecha";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -80,23 +92,86 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               FECHA DE INICIO
             </Typography>
-            <TextField
-              fullWidth
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              variant="outlined"
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <CalendarTodayIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              className="bg-white rounded-lg"
-              InputLabelProps={{ shrink: true }}
-            />
+            <Box sx={{ position: 'relative' }}>
+              <TextField
+                fullWidth
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => setFechaInicio(e.target.value)}
+                variant="outlined"
+                size="small"
+                className="bg-white rounded-lg"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  '& input[type="date"]': {
+                    position: 'relative',
+                    zIndex: 2,
+                    color: 'transparent', // Oculta el texto nativo
+                    caretColor: '#000', // Muestra el cursor
+                    '&:focus': {
+                      color: 'transparent',
+                    },
+                    '&:valid': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-fields-wrapper': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-text': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-month-field': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-day-field': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-year-field': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-inner-spin-button': {
+                      display: 'none',
+                    },
+                    '&::-webkit-calendar-picker-indicator': {
+                      position: 'absolute',
+                      left: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      cursor: 'pointer',
+                      zIndex: 3,
+                      opacity: 0,
+                      width: '100%',
+                      height: '100%',
+                    }
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarTodayIcon fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              {/* Texto personalizado para mostrar la fecha */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '40px',
+                  transform: 'translateY(-50%)',
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                  color: fechaInicio ? '#000' : 'rgba(0, 0, 0, 0.6)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                {formatDateForDisplay(fechaInicio)}
+              </Box>
+            </Box>
           </Box>
 
           {/* Fecha de Término */}
@@ -104,23 +179,86 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               FECHA DE TÉRMINO
             </Typography>
-            <TextField
-              fullWidth
-              type="date"
-              value={fechaTermino}
-              onChange={(e) => setFechaTermino(e.target.value)}
-              variant="outlined"
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <CalendarTodayIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              className="bg-white rounded-lg"
-              InputLabelProps={{ shrink: true }}
-            />
+            <Box sx={{ position: 'relative' }}>
+              <TextField
+                fullWidth
+                type="date"
+                value={fechaTermino}
+                onChange={(e) => setFechaTermino(e.target.value)}
+                variant="outlined"
+                size="small"
+                className="bg-white rounded-lg"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  '& input[type="date"]': {
+                    position: 'relative',
+                    zIndex: 2,
+                    color: 'transparent', // Oculta el texto nativo
+                    caretColor: '#000', // Muestra el cursor
+                    '&:focus': {
+                      color: 'transparent',
+                    },
+                    '&:valid': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-fields-wrapper': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-text': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-month-field': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-day-field': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-year-field': {
+                      color: 'transparent',
+                    },
+                    '&::-webkit-inner-spin-button': {
+                      display: 'none',
+                    },
+                    '&::-webkit-calendar-picker-indicator': {
+                      position: 'absolute',
+                      left: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      cursor: 'pointer',
+                      zIndex: 3,
+                      opacity: 0,
+                      width: '100%',
+                      height: '100%',
+                    }
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarTodayIcon fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              {/* Texto personalizado para mostrar la fecha */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '40px',
+                  transform: 'translateY(-50%)',
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                  color: fechaTermino ? '#000' : 'rgba(0, 0, 0, 0.6)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                {formatDateForDisplay(fechaTermino)}
+              </Box>
+            </Box>
           </Box>
 
           {/* Huéspedes */}
@@ -129,14 +267,16 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
               HUÉSPEDES
             </Typography>
             <FormControl fullWidth size="small" className="bg-white rounded-lg">
-              <InputLabel className="text-xs">Seleccionar</InputLabel>
               <Select
                 value={huespedes}
-                label="Seleccionar"
                 onChange={(e) => setHuespedes(Number(e.target.value))}
                 startAdornment={
                   <InputAdornment position="start">
-                    <PersonIcon fontSize="small" color="action" />
+                    {huespedes === 1 ? (
+                      <PersonIcon fontSize="small" color="action" />
+                    ) : (
+                      <PeopleIcon fontSize="small" color="action" />
+                    )}
                   </InputAdornment>
                 }
                 className="text-sm"

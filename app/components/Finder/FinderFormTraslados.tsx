@@ -18,6 +18,7 @@ FormControlLabel
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
+import PeopleIcon from "@mui/icons-material/People"; // Nuevo ícono para múltiples personas
 import SearchIcon from "@mui/icons-material/Search";
 import FlightLandIcon from "@mui/icons-material/FlightLand";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
@@ -53,6 +54,17 @@ const handleBuscar = () => {
     if (onBuscar) {
     onBuscar();
     }
+};
+
+// Función para formatear la fecha en un placeholder personalizado
+const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return "Seleccionar fecha";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+    });
 };
 
 return (
@@ -175,23 +187,86 @@ return (
             LLEGADA - FECHA Y HORA
             </Typography>
             <Stack direction="row" spacing={1}>
-            <TextField
+            <Box sx={{ position: 'relative', flex: 1 }}>
+                <TextField
                 fullWidth
                 type="date"
                 value={fechaLlegada}
                 onChange={(e) => setFechaLlegada(e.target.value)}
                 variant="outlined"
                 size="small"
-                InputProps={{
-                startAdornment: (
-                    <InputAdornment position="start">
-                    <CalendarTodayIcon fontSize="small" color="action" />
-                    </InputAdornment>
-                ),
-                }}
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
-            />
+                sx={{
+                    '& input[type="date"]': {
+                    position: 'relative',
+                    zIndex: 2,
+                    color: 'transparent', // Oculta el texto nativo
+                    caretColor: '#000', // Muestra el cursor
+                    '&:focus': {
+                        color: 'transparent',
+                    },
+                    '&:valid': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-fields-wrapper': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-text': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-month-field': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-day-field': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-datetime-edit-year-field': {
+                        color: 'transparent',
+                    },
+                    '&::-webkit-inner-spin-button': {
+                        display: 'none',
+                    },
+                    '&::-webkit-calendar-picker-indicator': {
+                        position: 'absolute',
+                        left: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        cursor: 'pointer',
+                        zIndex: 3,
+                        opacity: 0,
+                        width: '100%',
+                        height: '100%',
+                    }
+                    }
+                }}
+                InputProps={{
+                    startAdornment: (
+                    <InputAdornment position="start">
+                        <CalendarTodayIcon fontSize="small" color="action" />
+                    </InputAdornment>
+                    ),
+                }}
+                />
+                {/* Texto personalizado para mostrar la fecha */}
+                <Box
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '40px',
+                    transform: 'translateY(-50%)',
+                    zIndex: 1,
+                    pointerEvents: 'none',
+                    color: fechaLlegada ? '#000' : 'rgba(0, 0, 0, 0.6)',
+                    fontSize: '0.875rem',
+                }}
+                >
+                {formatDateForDisplay(fechaLlegada)}
+                </Box>
+            </Box>
             <TextField
                 fullWidth
                 type="time"
@@ -219,23 +294,86 @@ return (
                 SALIDA - FECHA Y HORA
             </Typography>
             <Stack direction="row" spacing={1}>
+                <Box sx={{ position: 'relative', flex: 1 }}>
                 <TextField
-                fullWidth
-                type="date"
-                value={fechaSalida}
-                onChange={(e) => setFechaSalida(e.target.value)}
-                variant="outlined"
-                size="small"
-                InputProps={{
+                    fullWidth
+                    type="date"
+                    value={fechaSalida}
+                    onChange={(e) => setFechaSalida(e.target.value)}
+                    variant="outlined"
+                    size="small"
+                    className="bg-white rounded-lg"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                    '& input[type="date"]': {
+                        position: 'relative',
+                        zIndex: 2,
+                        color: 'transparent', // Oculta el texto nativo
+                        caretColor: '#000', // Muestra el cursor
+                        '&:focus': {
+                        color: 'transparent',
+                        },
+                        '&:valid': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-datetime-edit': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-datetime-edit-fields-wrapper': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-datetime-edit-text': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-datetime-edit-month-field': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-datetime-edit-day-field': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-datetime-edit-year-field': {
+                        color: 'transparent',
+                        },
+                        '&::-webkit-inner-spin-button': {
+                        display: 'none',
+                        },
+                        '&::-webkit-calendar-picker-indicator': {
+                        position: 'absolute',
+                        left: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        cursor: 'pointer',
+                        zIndex: 3,
+                        opacity: 0,
+                        width: '100%',
+                        height: '100%',
+                        }
+                    }
+                    }}
+                    InputProps={{
                     startAdornment: (
-                    <InputAdornment position="start">
+                        <InputAdornment position="start">
                         <CalendarTodayIcon fontSize="small" color="action" />
-                    </InputAdornment>
+                        </InputAdornment>
                     ),
-                }}
-                className="bg-white rounded-lg"
-                InputLabelProps={{ shrink: true }}
+                    }}
                 />
+                {/* Texto personalizado para mostrar la fecha */}
+                <Box
+                    sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '40px',
+                    transform: 'translateY(-50%)',
+                    zIndex: 1,
+                    pointerEvents: 'none',
+                    color: fechaSalida ? '#000' : 'rgba(0, 0, 0, 0.6)',
+                    fontSize: '0.875rem',
+                    }}
+                >
+                    {formatDateForDisplay(fechaSalida)}
+                </Box>
+                </Box>
                 <TextField
                 fullWidth
                 type="time"
@@ -263,14 +401,16 @@ return (
             PASAJEROS
             </Typography>
             <FormControl fullWidth size="small" className="bg-white rounded-lg">
-            <InputLabel className="text-xs">Cantidad</InputLabel>
             <Select
                 value={pasajeros}
-                label="Cantidad"
                 onChange={(e) => setPasajeros(Number(e.target.value))}
                 startAdornment={
                 <InputAdornment position="start">
+                    {pasajeros === 1 ? (
                     <PersonIcon fontSize="small" color="action" />
+                    ) : (
+                    <PeopleIcon fontSize="small" color="action" />
+                    )}
                 </InputAdornment>
                 }
                 className="text-sm"

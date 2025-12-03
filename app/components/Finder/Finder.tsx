@@ -130,12 +130,12 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             iconPosition="top"
             {...a11yProps(7)}
           /> */}
-          <Tab
+          {/* <Tab
             label="Eventos"
             icon={<Image src="/images/icons/icon eventos.png" width={35} height={35} alt="Eventos" />}
             iconPosition="top"
             {...a11yProps(8)}
-          />
+          /> */}
         </Tabs>
       </Box>
       
@@ -159,12 +159,12 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
         <FinderFormAlojamientos tipoViaje="alojamientos" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      {/* <CustomTabPanel value={value} index={5}>
+      <CustomTabPanel value={value} index={3}>
         <FinderForm tipoViaje="carros" onBuscar={onBuscar} />
-      </CustomTabPanel> */}
+      </CustomTabPanel>
       
 
-      <CustomTabPanel value={value} index={3}>
+      <CustomTabPanel value={value} index={4}>
         <FinderFormTraslados tipoViaje="traslados" onBuscar={onBuscar} />
       </CustomTabPanel>
 
@@ -174,11 +174,11 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
 
       {/* <CustomTabPanel value={value} index={8}>
         <FinderForm tipoViaje="alquileres" onBuscar={onBuscar} />
-      </CustomTabPanel>
-      
-      <CustomTabPanel value={value} index={9}>
-        <FinderForm tipoViaje="eventos" onBuscar={onBuscar} />
       </CustomTabPanel> */}
+      
+      {/* <CustomTabPanel value={value} index={5}>
+        <FinderForm tipoViaje="eventos" onBuscar={onBuscar} />
+      </CustomTabPanel>  */}
     
     </Box>
   );
