@@ -9,13 +9,14 @@ import FinderFormAlojamientos from "./FinderFormAlojamientos";
 import FinderFormPaquetes from "./FinderFormPaquetes";
 import FinderFormExcursiones from "./FinderFormExcursiones";
 import FinderFormEventos from "./FinderFormEventos";
-
+import FinderFormTransporteHotel from "./FinderFormTransporteHotel"; 
+import FinderFormDestinos from "./FinderFormDestinos"
+import FinderFormRentaAutos from "./FinderFormAutos";
 
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
 import FlightIcon from '@mui/icons-material/Flight';
 import HotelIcon from '@mui/icons-material/Hotel';
-import FinderFormTransporteHotel from "./FinderFormTransporteHotel"; 
 
 
 interface TabPanelProps {
@@ -95,12 +96,6 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             iconPosition="top"
             {...a11yProps(1)}
           />
-          {/* <Tab
-            label="Destinos"
-            icon={<Image src="/images/icons/icon destinos.png" width={35} height={35} alt="Destinos" />}
-            iconPosition="top"
-            {...a11yProps(2)}
-          /> */}
           <Tab
             label="Excursiones"
             icon={<Image src="/images/icons/icon excursiones.png" width={35} height={35} alt="Excursiones" />}
@@ -170,6 +165,12 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             iconPosition="top"
             {...a11yProps(10)}
           />
+          <Tab
+            label="Destinos"
+            icon={<Image src="/images/icons/icon destinos.png" width={35} height={35} alt="Destinos" />}
+            iconPosition="top"
+            {...a11yProps(11)}
+          />
         </Tabs>
       </Box>
       
@@ -181,10 +182,6 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
         <FinderFormPaquetes tipoViaje="paquetes" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      {/* <CustomTabPanel value={value} index={2}>
-        <FinderForm tipoViaje="destinos" onBuscar={onBuscar} />
-      </CustomTabPanel> */}
-
       <CustomTabPanel value={value} index={1}>
         <FinderFormExcursiones tipoViaje="excursiones" onBuscar={onBuscar} />
       </CustomTabPanel>
@@ -194,7 +191,7 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={3}>
-        <FinderForm tipoViaje="carros" onBuscar={onBuscar} />
+        <FinderFormRentaAutos tipoViaje="carros" onBuscar={onBuscar} />
       </CustomTabPanel>
       
 
@@ -208,6 +205,10 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
     
       <CustomTabPanel value={value} index={6}> 
         <FinderFormTransporteHotel tipoViaje="transporte-hotel" onBuscar={onBuscar} />
+      </CustomTabPanel>
+
+      <CustomTabPanel value={value} index={7}>
+        <FinderFormDestinos tipoViaje="destinos" onBuscar={onBuscar} />
       </CustomTabPanel>
 
     {/* <CustomTabPanel value={value} index={7}>
