@@ -4,6 +4,20 @@ import Box from "@mui/material/Box";
 import { SyntheticEvent } from "react";
 import Image from "next/image";
 import FinderForm from "./FinderForm";
+import FinderFormTraslados from "./FinderFormTraslados";
+import FinderFormAlojamientos from "./FinderFormAlojamientos";
+import FinderFormPaquetes from "./FinderFormPaquetes";
+import FinderFormExcursiones from "./FinderFormExcursiones";
+import FinderFormEventos from "./FinderFormEventos";
+import FinderFormTransporteHotel from "./FinderFormTransporteHotel"; 
+import FinderFormDestinos from "./FinderFormDestinos"
+import FinderFormRentaAutos from "./FinderFormAutos";
+
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+
+import FlightIcon from '@mui/icons-material/Flight';
+import HotelIcon from '@mui/icons-material/Hotel';
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,23 +84,17 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             },
           }}
         >
-          <Tab
+          {/* <Tab
             label="Ofertas"
             icon={<Image src="/images/icons/icon ofertas.png" width={35} height={35} alt="Ofertas" />}
             iconPosition="top"
             {...a11yProps(0)}
-          />
+          /> */}
           <Tab
             label="Paquetes"
             icon={<Image src="/images/icons/icon paquetes.png" width={35} height={35} alt="Paquetes" />}
             iconPosition="top"
             {...a11yProps(1)}
-          />
-          <Tab
-            label="Destinos"
-            icon={<Image src="/images/icons/icon destinos.png" width={35} height={35} alt="Destinos" />}
-            iconPosition="top"
-            {...a11yProps(2)}
           />
           <Tab
             label="Excursiones"
@@ -107,61 +115,110 @@ export default function Finder({ value, onChange, onBuscar }: FinderProps) {
             {...a11yProps(5)}
           />
           <Tab
+            label="Traslados"
+            icon={<DirectionsBusIcon sx={{ fontSize: 35 }} />}
+            iconPosition="top"
+            {...a11yProps(9)}
+          />
+          {/* <Tab
             label="Vuelos"
             icon={<Image src="/images/icons/icon vuelos.png" width={35} height={35} alt="Vuelos" />}
             iconPosition="top"
             {...a11yProps(6)}
-          />
-          <Tab
+          /> */}
+          {/* <Tab
             label="Alquiler"
             icon={<Image src="/images/icons/icon alquileres.png" width={35} height={35} alt="Alquiler" />}
             iconPosition="top"
             {...a11yProps(7)}
-          />
+          /> */}
           <Tab
             label="Eventos"
             icon={<Image src="/images/icons/icon eventos.png" width={35} height={35} alt="Eventos" />}
             iconPosition="top"
             {...a11yProps(8)}
           />
+          <Tab
+            label="Transporte+Hotel"
+            icon={
+              <Box sx={{ position: 'relative', width: 35, height: 35 }}>
+                <FlightIcon 
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 0, 
+                    left: 0, 
+                    fontSize: 20,
+                    color: '#FFFFFF'
+                  }} 
+                />
+                <HotelIcon 
+                  sx={{ 
+                    position: 'absolute', 
+                    bottom: 0, 
+                    right: 0, 
+                    fontSize: 20,
+                    color: '#FFFFFF'
+                  }} 
+                />
+              </Box>
+            }
+            iconPosition="top"
+            {...a11yProps(10)}
+          />
+          <Tab
+            label="Destinos"
+            icon={<Image src="/images/icons/icon destinos.png" width={35} height={35} alt="Destinos" />}
+            iconPosition="top"
+            {...a11yProps(11)}
+          />
         </Tabs>
       </Box>
       
-      <CustomTabPanel value={value} index={0}>
+      {/* <CustomTabPanel value={value} index={0}>
         <FinderForm tipoViaje="ofertas" onBuscar={onBuscar} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
      
+      <CustomTabPanel value={value} index={0}>
+        <FinderFormPaquetes tipoViaje="paquetes" onBuscar={onBuscar} />
+      </CustomTabPanel>
+
       <CustomTabPanel value={value} index={1}>
-        <FinderForm tipoViaje="paquetes" onBuscar={onBuscar} />
+        <FinderFormExcursiones tipoViaje="excursiones" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={2}>
-        <FinderForm tipoViaje="destinos" onBuscar={onBuscar} />
+        <FinderFormAlojamientos tipoViaje="alojamientos" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={3}>
-        <FinderForm tipoViaje="excursiones" onBuscar={onBuscar} />
+        <FinderFormRentaAutos tipoViaje="carros" onBuscar={onBuscar} />
       </CustomTabPanel>
+      
 
       <CustomTabPanel value={value} index={4}>
-        <FinderForm tipoViaje="alojamientos" onBuscar={onBuscar} />
+        <FinderFormTraslados tipoViaje="traslados" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={5}>
-        <FinderForm tipoViaje="carros" onBuscar={onBuscar} />
-      </CustomTabPanel>
-
-      <CustomTabPanel value={value} index={6}>
-        <FinderForm tipoViaje="vuelos" onBuscar={onBuscar} />
+        <FinderFormEventos tipoViaje="eventos" onBuscar={onBuscar} />
+      </CustomTabPanel>  
+    
+      <CustomTabPanel value={value} index={6}> 
+        <FinderFormTransporteHotel tipoViaje="transporte-hotel" onBuscar={onBuscar} />
       </CustomTabPanel>
 
       <CustomTabPanel value={value} index={7}>
-        <FinderForm tipoViaje="alquileres" onBuscar={onBuscar} />
+        <FinderFormDestinos tipoViaje="destinos" onBuscar={onBuscar} />
       </CustomTabPanel>
 
-      <CustomTabPanel value={value} index={8}>
-        <FinderForm tipoViaje="eventos" onBuscar={onBuscar} />
-      </CustomTabPanel>
+    {/* <CustomTabPanel value={value} index={7}>
+        <FinderForm tipoViaje="vuelos" onBuscar={onBuscar} />
+      </CustomTabPanel> */}
+
+      {/* <CustomTabPanel value={value} index={8}>
+        <FinderForm tipoViaje="alquileres" onBuscar={onBuscar} />
+      </CustomTabPanel> */}
+      
     </Box>
   );
 }

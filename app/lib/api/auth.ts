@@ -224,9 +224,85 @@ export async function logoutUser(): Promise<StandardResponse> {
     headers,
   });
 }
+export interface Certification {
+  certification_name: string;
+  issuing_organization: string;
+  issue_date: string;
+  expiry_date: string;
+  certificate_number: string;
+  document_url: string;
+}
+
+export interface Specializations {
+  destinations: string[];
+  types: string[];
+  languages: string[];
+}
+
+export interface ServiceRegions {
+  countries: string[];
+  states: string[];
+}
+
+export interface AgentData {
+  agency_name: string;
+  license_number: string;
+  commission_rate: number;
+  specializations: Specializations;
+  service_regions: ServiceRegions;
+  years_of_experience: number;
+  bio: string;
+  website: string;
+  office_phone: string;
+  office_address: string;
+  certifications: Certification[];
+}
+
+export interface RegisterAgentData {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  agent_data: AgentData;
+}
+
+export async function registerAgent(data: RegisterAgentData): Promise<StandardResponse> {
+  const requestBody = {
+    email: data.email.trim(),
+    password: data.password,
+    first_name: data.first_name.trim(),
+    last_name: data.last_name.trim(),
+    agent_data: {
+      agency_name: data.agent_data.agency_name.trim(),
+      license_number: data.agent_data.license_number.trim(),
+      commission_rate: parseFloat(data.agent_data.commission_rate.toString()),
+      specializations: {
+        destinations: data.agent_data.specializations.destinations,
+        types: data.agent_data.specializations.types,
+        languages: data.agent_data.specializations.languages,
+      },
+      service_regions: {
+        countries: data.agent_data.service_regions.countries,
+        states: data.agent_data.service_regions.states,
+      },
+      years_of_experience: parseInt(data.agent_data.years_of_experience.toString()),
+      bio: data.agent_data.bio.trim(),
+      website: data.agent_data.website.trim(),
+      office_phone: data.agent_data.office_phone.trim(),
+      office_address: data.agent_data.office_address.trim(),
+      certifications: data.agent_data.certifications || [],
+    },
+  };
+
+  return apiRequest<StandardResponse>('/v1/auth/register', {
+    method: 'POST',
+    body: requestBody,
+  });
+}
 
 export default {
   registerUser,
+  registerAgent,
   loginUser,
   verifyUser,
   forgotPassword,
