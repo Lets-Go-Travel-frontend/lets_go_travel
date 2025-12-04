@@ -186,13 +186,13 @@ export default function HeaderTopBar() {
           <span className="text-gray-400 hidden md:inline">|</span>
           
           {/* Botón para agencias (siempre visible) - MODIFICADO */}
-          <button 
+          {/* <button 
             ref={agencyButtonRef}
             onClick={handleAgencyRegistration} 
             className="flex-center hover:underline cursor-pointer text-sm md:text-base bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600 transition-colors"
           >
             Agencias B2B
-          </button>
+          </button> */}
         </Stack>
       </Stack>
 
@@ -311,13 +311,13 @@ export default function HeaderTopBar() {
               >
                 Iniciar Sesión
               </button>
-              <button 
+              {/* <button 
                 ref={agencyButtonRef}
                 onClick={handleAgencyRegistration} 
                 className="w-full text-left p-3 hover:bg-orange-50 rounded border border-orange-200 text-orange-600 font-semibold bg-orange-100"
               >
                 Agencias B2B
-              </button>
+              </button> */}
             </Box>
           )}
 
