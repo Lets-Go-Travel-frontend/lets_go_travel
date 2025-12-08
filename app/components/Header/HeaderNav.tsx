@@ -16,9 +16,9 @@ export default function HeaderNav() {
           ></SearchRoundedIcon>
         </div>
 
-        <div>
+        {/* <div>
           <button className="text-white px-4 py-2 rounded-md">Agencias / B2B</button>
-        </div>
+        </div> */}
 
       </Stack>
     </nav>
