@@ -60,12 +60,8 @@ export default function FinderFormDestinos({ tipoViaje, onBuscar }: FinderFormPr
 
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   const handleGuestsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -241,11 +237,21 @@ export default function FinderFormDestinos({ tipoViaje, onBuscar }: FinderFormPr
                 fullWidth
                 type="date"
                 value={fechaIda}
-                onChange={(e) => setFechaIda(e.target.value)}
+                onChange={(e) => {
+                  const nuevaFecha = e.target.value;
+                  setFechaIda(nuevaFecha);
+                  // Si la fecha de ida es posterior a la de regreso, resetear fecha de regreso
+                  if (fechaRegreso && nuevaFecha > fechaRegreso) {
+                    setFechaRegreso("");
+                  }
+                }}
                 variant="outlined"
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
@@ -315,6 +321,9 @@ export default function FinderFormDestinos({ tipoViaje, onBuscar }: FinderFormPr
                   size="small"
                   className="bg-white rounded-lg"
                   InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: fechaIda || new Date().toISOString().split('T')[0]
+                  }}
                   sx={{
                     '& input[type="date"]': {
                       position: 'relative',

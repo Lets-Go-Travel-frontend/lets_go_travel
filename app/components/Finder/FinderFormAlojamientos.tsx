@@ -1,4 +1,3 @@
-// components/FinderForm/FinderForm.tsx
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import { 
@@ -42,7 +41,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   
-  // Estado para el selector de huéspedes
   const [guestsAnchorEl, setGuestsAnchorEl] = useState<null | HTMLElement>(null);
   const [guests, setGuests] = useState({
     adultos: 2,
@@ -65,18 +63,12 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
     }
   };
 
-  // Función para formatear la fecha en un placeholder personalizado
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
-  // Funciones para el selector de huéspedes
   const handleGuestsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setGuestsAnchorEl(event.currentTarget);
   };
@@ -89,7 +81,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
     setGuests(newGuests);
   };
 
-  // Calcular el total de huéspedes
   const totalGuests = guests.adultos + guests.niños12_17 + guests.niños2_11;
   const displayGuests = totalGuests === 0 ? "Seleccionar" : 
     `${totalGuests} ${totalGuests === 1 ? 'huésped' : 'huéspedes'}${guests.infantes > 0 ? `, ${guests.infantes} ${guests.infantes === 1 ? 'infante' : 'infantes'}` : ''}`;
@@ -167,7 +158,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             </FormControl>
           </Box>
 
-          {/* Nacionalidad - Más pequeño */}
           <Box className={isMobile ? "w-full" : ""} sx={{ 
             width: isMobile ? '100%' : 'auto',
             minWidth: isMobile ? '100%' : '180px',
@@ -214,8 +204,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
           alignItems={isMobile ? "stretch" : "flex-end"}
           className="w-full"
         >
-          {/* Destino - MÁS GRANDE */}
-          <Box className={isMobile ? "w-full" : "flex-2"}> {/* flex-2 para más ancho */}
+          <Box className={isMobile ? "w-full" : "flex-2"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               DESTINO
             </Typography>
@@ -242,7 +231,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             />
           </Box>
 
-          {/* Check-In */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               CHECK-IN
@@ -252,11 +240,20 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 fullWidth
                 type="date"
                 value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
+                onChange={(e) => {
+                  const nuevaFecha = e.target.value;
+                  setCheckIn(nuevaFecha);
+                  if (checkOut && nuevaFecha > checkOut) {
+                    setCheckOut("");
+                  }
+                }}
                 variant="outlined"
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
@@ -310,7 +307,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             </Box>
           </Box>
 
-          {/* Check-Out */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               CHECK-OUT
@@ -325,6 +321,9 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: checkIn || new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
@@ -378,7 +377,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             </Box>
           </Box>
 
-          {/* Huéspedes - Ahora con popover */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               HUÉSPEDES
@@ -412,7 +410,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             </Button>
           </Box>
 
-          {/* Botón BUSCAR */}
           <Box className={isMobile ? "w-full flex justify-center mt-1" : "flex items-end"}>
             <Button
               variant="contained"
@@ -433,7 +430,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
         </Stack>
       </Box>
 
-      {/* Popover para selector de huéspedes */}
       <Popover
         open={Boolean(guestsAnchorEl)}
         anchorEl={guestsAnchorEl}
