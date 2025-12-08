@@ -251,9 +251,21 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 borderColor: 'rgba(0, 0, 0, 0.23)',
                 color: '#000',
                 height: '40px',
+                backgroundColor: 'white',
                 '&:hover': {
+                  backgroundColor: 'white !important',
+                  borderColor: 'rgba(0, 0, 0, 1) !important',
+                },
+                '&.Mui-focusVisible': {
+                  backgroundColor: 'white',
+                },
+                '&:focus': {
+                  backgroundColor: 'white',
                   borderColor: 'rgba(0, 0, 0, 0.23)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                },
+                '&:active': {
+                  backgroundColor: 'white',
+                  borderColor: 'rgba(0, 0, 0, 0.23)',
                 }
               }}
               endIcon={<ArrowDropDownIcon />}

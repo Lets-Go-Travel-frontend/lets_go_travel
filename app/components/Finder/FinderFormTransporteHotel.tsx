@@ -367,33 +367,33 @@ export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: Finde
             </Box>
           </Box>
 
-          {/* Seleccionar habitaciones y personas */}
-          <Box className={isMobile ? "w-full" : "flex-1"}>
-            <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
-              HABITACIONES Y PERSONAS
+         <Box className={isMobile ? "w-full" : "flex-1"}>
+          <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
+            HABITACIONES Y PERSONAS
+          </Typography>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={handleRoomsGuestsClick}
+            className="bg-white rounded-lg text-left justify-start normal-case"
+            sx={{
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+              color: '#000',
+              height: '40px',
+              backgroundColor: 'white',
+              '&:hover': {
+                backgroundColor: 'white',
+                borderColor: 'rgba(0, 0, 0, 1)', 
+              }
+            }}
+            endIcon={<ArrowDropDownIcon />}
+            startIcon={<PersonIcon fontSize="small" color="action" />}
+          >
+            <Typography className="text-sm truncate">
+              {displayRoomsGuests}
             </Typography>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={handleRoomsGuestsClick}
-              className="bg-white rounded-lg text-left justify-start normal-case"
-              sx={{
-                borderColor: 'rgba(0, 0, 0, 0.23)',
-                color: '#000',
-                height: '40px',
-                '&:hover': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                }
-              }}
-              endIcon={<ArrowDropDownIcon />}
-              startIcon={<PersonIcon fontSize="small" color="action" />}
-            >
-              <Typography className="text-sm truncate">
-                {displayRoomsGuests}
-              </Typography>
-            </Button>
-          </Box>
+          </Button>
+        </Box>
 
           {/* Botón BUSCAR */}
           <Box className={isMobile ? "w-full flex justify-center mt-1" : "flex items-end"}>

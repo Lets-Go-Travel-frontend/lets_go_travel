@@ -393,8 +393,8 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 color: '#000',
                 height: '40px',
                 '&:hover': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'rgba(0, 0, 0, 1)',
+                  backgroundColor: 'rgba(255, 255, 255, 1)',
                 }
               }}
               endIcon={<ArrowDropDownIcon />}
