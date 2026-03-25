@@ -52,12 +52,8 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
 
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   const formatTimeForDisplay = (timeString: string) => {
@@ -65,9 +61,15 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
     return timeString;
   };
 
+  const validateHoraEntrega = (nuevaHora: string) => {
+    if (fechaRecogida === fechaEntrega && horaRecogida && nuevaHora < horaRecogida) {
+      return horaRecogida;
+    }
+    return nuevaHora;
+  };
+
   return (
     <Box className="flex flex-col items-center w-full">
-      {/* Fila 1: Checkboxes */}
       <Box className="mb-4 w-full max-w-6xl">
         <Stack 
           direction={isMobile ? "column" : "row"} 
@@ -137,16 +139,13 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
         </Stack>
       </Box>
 
-      {/* ESTRUCTURA DE 3 COLUMNAS */}
       <Stack 
         direction={isMobile ? "column" : "row"} 
         spacing={isMobile ? 2 : 1.5} 
         alignItems="flex-start" 
         className="w-full max-w-6xl"
       >
-        {/* COLUMNA 1: Origen y Devolución - MÁS ANCHO */}
         <Box className={isMobile ? "w-full" : "flex-[1.8]"} sx={{ display: 'flex', flexDirection: 'column' }}>
-          {/* Encabezado de columna 1 */}
           <Box sx={{ mb: 1, display: 'flex', justifyContent: 'flex-start' }}>
             <Typography 
               className="text-white font-bold uppercase tracking-wide"
@@ -156,19 +155,18 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
             </Typography>
           </Box>
           
-          {/* Formulario columna 1 */}
           <Paper 
             className="rounded-xl border border-gray-200 shadow-sm relative min-h-[50px] w-full"
             sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)' }}
           >
             <Box className="p-2">
               <Stack direction="row" className="h-full" spacing={0} alignItems="center">
-                {/* Origen */}
                 <Box className="flex-1 pr-2">
                   <TextField
                     fullWidth
                     value={origen}
                     onChange={(e) => {
+                      console.log('Origen cambiado:', e.target.value);
                       setOrigen(e.target.value);
                       if (mismaOficina) {
                         setDevolucion(e.target.value);
@@ -205,15 +203,16 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                   />
                 </Box>
                 
-                {/* Separador visual */}
                 <Box className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-300 transform -translate-x-1/2"></Box>
                 
-                {/* Devolución */}
                 <Box className="flex-1 pl-2">
                   <TextField
                     fullWidth
                     value={devolucion}
-                    onChange={(e) => setDevolucion(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Devolución cambiada:', e.target.value);
+                      setDevolucion(e.target.value);
+                    }}
                     placeholder="Ciudad o aeropuerto"
                     variant="outlined"
                     size="small"
@@ -253,9 +252,7 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
           </Paper>
         </Box>
 
-        {/* COLUMNA 2: Recogida - Fecha y Hora - MUY ESTRECHO */}
         <Box className={isMobile ? "w-full mt-3" : "flex-[0.7]"} sx={{ display: 'flex', flexDirection: 'column' }}>
-          {/* Encabezado de columna 2 */}
           <Box sx={{ mb: 1, display: 'flex', justifyContent: 'flex-start' }}>
             <Typography 
               className="text-white font-bold uppercase tracking-wide"
@@ -265,24 +262,36 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
             </Typography>
           </Box>
           
-          {/* Formulario columna 2 - MUY COMPACTO */}
           <Paper 
             className="rounded-xl border border-gray-200 shadow-sm min-h-[50px] w-full"
             sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)' }}
           >
             <Box className="p-2">
               <Stack direction="row" spacing={0.5} alignItems="center" sx={{ height: '40px' }}>
-                {/* Fecha de recogida - MUY ESTRECHO */}
                 <Box sx={{ position: 'relative', width: '52%' }}>
                   <TextField
                     fullWidth
                     type="date"
                     value={fechaRecogida}
-                    onChange={(e) => setFechaRecogida(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Fecha recogida seleccionada:', e.target.value);
+                      const nuevaFecha = e.target.value;
+                      setFechaRecogida(nuevaFecha);
+                      if (fechaEntrega && nuevaFecha > fechaEntrega) {
+                        setFechaEntrega("");
+                        setHoraEntrega("");
+                      }
+                      if (nuevaFecha === fechaEntrega && horaRecogida && horaEntrega && horaEntrega < horaRecogida) {
+                        setHoraEntrega(horaRecogida);
+                      }
+                    }}
                     variant="outlined"
                     size="small"
                     className="bg-white rounded-lg"
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: new Date().toISOString().split('T')[0]
+                    }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         '& fieldset': {
@@ -338,7 +347,6 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                       ),
                     }}
                   />
-                  {/* Texto personalizado para mostrar la fecha */}
                   <Box
                     sx={{
                       position: 'absolute',
@@ -360,13 +368,19 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                   </Box>
                 </Box>
                 
-                {/* Hora de recogida - ESTRECHO - CORREGIDO */}
                 <Box sx={{ position: 'relative', width: '48%' }}>
                   <TextField
                     fullWidth
                     type="time"
                     value={horaRecogida}
-                    onChange={(e) => setHoraRecogida(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Hora recogida seleccionada:', e.target.value);
+                      const nuevaHora = e.target.value;
+                      setHoraRecogida(nuevaHora);
+                      if (fechaRecogida === fechaEntrega && horaEntrega && nuevaHora > horaEntrega) {
+                        setHoraEntrega(nuevaHora);
+                      }
+                    }}
                     variant="outlined"
                     size="small"
                     className="bg-white rounded-lg"
@@ -429,7 +443,6 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                       ),
                     }}
                   />
-                  {/* Texto personalizado para mostrar la hora - CORREGIDO */}
                   <Box
                     sx={{
                       position: 'absolute',
@@ -455,9 +468,7 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
           </Paper>
         </Box>
 
-        {/* COLUMNA 3: Entrega - Fecha y Hora - MUY ESTRECHO */}
         <Box className={isMobile ? "w-full mt-3" : "flex-[0.7]"} sx={{ display: 'flex', flexDirection: 'column' }}>
-          {/* Encabezado de columna 3 */}
           <Box sx={{ mb: 1, display: 'flex', justifyContent: 'flex-start' }}>
             <Typography 
               className="text-white font-bold uppercase tracking-wide"
@@ -467,24 +478,32 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
             </Typography>
           </Box>
           
-          {/* Formulario columna 3 - MUY COMPACTO */}
           <Paper 
             className="rounded-xl border border-gray-200 shadow-sm min-h-[50px] w-full"
             sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)' }}
           >
             <Box className="p-2">
               <Stack direction="row" spacing={0.5} alignItems="center" sx={{ height: '40px' }}>
-                {/* Fecha de entrega - MUY ESTRECHO */}
                 <Box sx={{ position: 'relative', width: '52%' }}>
                   <TextField
                     fullWidth
                     type="date"
                     value={fechaEntrega}
-                    onChange={(e) => setFechaEntrega(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Fecha entrega seleccionada:', e.target.value);
+                      const nuevaFecha = e.target.value;
+                      setFechaEntrega(nuevaFecha);
+                      if (nuevaFecha === fechaRecogida && horaRecogida && horaEntrega && horaEntrega < horaRecogida) {
+                        setHoraEntrega(horaRecogida);
+                      }
+                    }}
                     variant="outlined"
                     size="small"
                     className="bg-white rounded-lg"
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: fechaRecogida || new Date().toISOString().split('T')[0]
+                    }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         '& fieldset': {
@@ -540,7 +559,6 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                       ),
                     }}
                   />
-                  {/* Texto personalizado para mostrar la fecha */}
                   <Box
                     sx={{
                       position: 'absolute',
@@ -562,17 +580,23 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                   </Box>
                 </Box>
                 
-                {/* Hora de entrega - ESTRECHO - CORREGIDO */}
                 <Box sx={{ position: 'relative', width: '48%' }}>
                   <TextField
                     fullWidth
                     type="time"
                     value={horaEntrega}
-                    onChange={(e) => setHoraEntrega(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Hora entrega seleccionada:', e.target.value);
+                      const nuevaHora = validateHoraEntrega(e.target.value);
+                      setHoraEntrega(nuevaHora);
+                    }}
                     variant="outlined"
                     size="small"
                     className="bg-white rounded-lg"
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: fechaRecogida === fechaEntrega ? horaRecogida || "00:00" : "00:00"
+                    }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         '& fieldset': {
@@ -631,7 +655,6 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
                       ),
                     }}
                   />
-                  {/* Texto personalizado para mostrar la hora - CORREGIDO */}
                   <Box
                     sx={{
                       position: 'absolute',
@@ -657,17 +680,14 @@ export default function FinderFormRentaAutos({ tipoViaje, onBuscar }: FinderForm
           </Paper>
         </Box>
         
-        {/* Botón BUSCAR - como columna 4 */}
         <Box className={isMobile ? "w-full mt-3" : ""} sx={{ 
           display: 'flex', 
           flexDirection: 'column',
           justifyContent: 'flex-end',
           minWidth: isMobile ? '100%' : '120px'
         }}>
-          {/* Espacio vacío para alinear con los encabezados */}
           <Box sx={{ mb: 1, height: '21px' }}></Box>
           
-          {/* Botón BUSCAR */}
           <Button
             variant="contained"
             className={`

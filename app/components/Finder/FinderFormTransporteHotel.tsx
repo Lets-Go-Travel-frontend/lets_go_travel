@@ -62,12 +62,8 @@ export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: Finde
 
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   const handleRoomsGuestsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -241,11 +237,21 @@ export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: Finde
                 fullWidth
                 type="date"
                 value={fechaSalida}
-                onChange={(e) => setFechaSalida(e.target.value)}
+                onChange={(e) => {
+                  const nuevaFecha = e.target.value;
+                  setFechaSalida(nuevaFecha);
+                  // Si la fecha de salida es posterior a la de vuelta, resetear fecha de vuelta
+                  if (fechaVuelta && nuevaFecha > fechaVuelta) {
+                    setFechaVuelta("");
+                  }
+                }}
                 variant="outlined"
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
@@ -314,6 +320,9 @@ export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: Finde
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: fechaSalida || new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
@@ -367,7 +376,6 @@ export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: Finde
             </Box>
           </Box>
 
-          {/* Seleccionar habitaciones y personas */}
           <Box className={isMobile ? "w-full" : "flex-1"}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               HABITACIONES Y PERSONAS
@@ -381,9 +389,10 @@ export default function FinderFormTransporteHotel({ tipoViaje, onBuscar }: Finde
                 borderColor: 'rgba(0, 0, 0, 0.23)',
                 color: '#000',
                 height: '40px',
+                backgroundColor: 'white',
                 '&:hover': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: 'white',
+                  borderColor: 'rgba(0, 0, 0, 1)', 
                 }
               }}
               endIcon={<ArrowDropDownIcon />}

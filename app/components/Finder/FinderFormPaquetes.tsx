@@ -43,12 +43,8 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
   // Función para formatear la fecha en un placeholder personalizado
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -99,12 +95,15 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
                     zIndex: 2,
-                    color: 'transparent', // Oculta el texto nativo
-                    caretColor: '#000', // Muestra el cursor
+                    color: 'transparent',
+                    caretColor: '#000',
                     '&:focus': {
                       color: 'transparent',
                     },

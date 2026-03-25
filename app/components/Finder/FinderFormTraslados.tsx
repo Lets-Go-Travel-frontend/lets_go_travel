@@ -59,18 +59,22 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
   // Función para formatear la fecha en un placeholder personalizado
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   // Función para formatear la hora en un placeholder personalizado
   const formatTimeForDisplay = (timeString: string) => {
     if (!timeString) return "Seleccionar";
     return timeString;
+  };
+
+  // Validar hora de salida cuando es el mismo día
+  const validateHoraSalida = (nuevaHora: string) => {
+    if (fechaLlegada === fechaSalida && horaLlegada && nuevaHora < horaLlegada) {
+      return horaLlegada;
+    }
+    return nuevaHora;
   };
 
   return (
@@ -187,31 +191,46 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
           alignItems={isMobile ? "stretch" : "flex-end"}
           className="w-full"
           sx={{
-            flexWrap: 'nowrap', // Evita que haga wrap
-            overflowX: 'visible', // Permite que salga del contenedor
+            flexWrap: 'nowrap',
+            overflowX: 'visible',
             position: 'relative',
           }}
         >
-          {/* Fecha y Hora de Llegada - MÁS COMPACTO */}
+          {/* Fecha y Hora de Llegada */}
           <Box className={isMobile ? "w-full" : ""} sx={{ 
-            minWidth: isMobile ? '100%' : '250px', // Ancho mínimo
-            flexShrink: 0, // No se reduce
+            minWidth: isMobile ? '100%' : '250px',
+            flexShrink: 0,
           }}>
             <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
               LLEGADA - FECHA Y HORA
             </Typography>
             <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
-              {/* Fecha de Llegada - CON PADDING */}
+              {/* Fecha de Llegada */}
               <Box sx={{ position: 'relative', flex: 1, minWidth: '110px' }}>
                 <TextField
                   fullWidth
                   type="date"
                   value={fechaLlegada}
-                  onChange={(e) => setFechaLlegada(e.target.value)}
+                  onChange={(e) => {
+                    const nuevaFecha = e.target.value;
+                    setFechaLlegada(nuevaFecha);
+                    // Si la fecha de llegada es posterior a la de salida, resetear fecha de salida
+                    if (fechaSalida && nuevaFecha > fechaSalida) {
+                      setFechaSalida("");
+                      setHoraSalida("");
+                    }
+                    // Si es el mismo día, ajustar hora de salida
+                    if (nuevaFecha === fechaSalida && horaLlegada && horaSalida && horaSalida < horaLlegada) {
+                      setHoraSalida(horaLlegada);
+                    }
+                  }}
                   variant="outlined"
                   size="small"
                   className="bg-white rounded-lg"
                   InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: new Date().toISOString().split('T')[0]
+                  }}
                   sx={{
                     '& input[type="date"]': {
                       position: 'relative',
@@ -261,18 +280,18 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                   }}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start" sx={{ pr: 1 }}> {/* ← PADDING AQUÍ */}
+                      <InputAdornment position="start" sx={{ pr: 1 }}>
                         <CalendarTodayIcon fontSize="small" color="action" />
                       </InputAdornment>
                     ),
                   }}
                 />
-                {/* Texto personalizado para mostrar la fecha - AJUSTADO */}
+                {/* Texto personalizado para mostrar la fecha */}
                 <Box
                   sx={{
                     position: 'absolute',
                     top: '50%',
-                    left: '44px', // ← AUMENTADO de 32px a 44px
+                    left: '44px',
                     transform: 'translateY(-50%)',
                     zIndex: 1,
                     pointerEvents: 'none',
@@ -281,20 +300,27 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    width: 'calc(100% - 48px)', // ← AJUSTADO
+                    width: 'calc(100% - 48px)',
                   }}
                 >
                   {formatDateForDisplay(fechaLlegada)}
                 </Box>
               </Box>
               
-              {/* Hora de Llegada - CON PADDING */}
+              {/* Hora de Llegada */}
               <Box sx={{ position: 'relative', flex: 1, minWidth: '100px' }}>
                 <TextField
                   fullWidth
                   type="time"
                   value={horaLlegada}
-                  onChange={(e) => setHoraLlegada(e.target.value)}
+                  onChange={(e) => {
+                    const nuevaHora = e.target.value;
+                    setHoraLlegada(nuevaHora);
+                    // Si es el mismo día, ajustar hora de salida
+                    if (fechaLlegada === fechaSalida && horaSalida && nuevaHora > horaSalida) {
+                      setHoraSalida(nuevaHora);
+                    }
+                  }}
                   variant="outlined"
                   size="small"
                   className="bg-white rounded-lg"
@@ -328,18 +354,18 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                   }}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start" sx={{ pr: 1 }}> {/* ← PADDING AQUÍ */}
+                      <InputAdornment position="start" sx={{ pr: 1 }}>
                         <AccessTimeIcon fontSize="small" color="action" />
                       </InputAdornment>
                     ),
                   }}
                 />
-                {/* Texto personalizado para mostrar la hora - AJUSTADO */}
+                {/* Texto personalizado para mostrar la hora */}
                 <Box
                   sx={{
                     position: 'absolute',
                     top: '50%',
-                    left: '44px', // ← AUMENTADO de 32px a 44px
+                    left: '44px',
                     transform: 'translateY(-50%)',
                     zIndex: 1,
                     pointerEvents: 'none',
@@ -348,7 +374,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    width: 'calc(100% - 48px)', // ← AJUSTADO
+                    width: 'calc(100% - 48px)',
                   }}
                 >
                   {formatTimeForDisplay(horaLlegada)}
@@ -360,24 +386,34 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
           {/* Fecha y Hora de Salida (solo si es ida y vuelta) */}
           {tipoTraslado === "ida-vuelta" && (
             <Box className={isMobile ? "w-full mt-3" : ""} sx={{ 
-              minWidth: isMobile ? '100%' : '250px', // Mismo ancho mínimo
-              flexShrink: 0, // No se reduce
+              minWidth: isMobile ? '100%' : '250px',
+              flexShrink: 0,
             }}>
               <Typography variant="caption" className="text-white font-bold uppercase tracking-wide text-xs mb-1 block">
                 SALIDA - FECHA Y HORA
               </Typography>
               <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
-                {/* Fecha de Salida - CON PADDING */}
+                {/* Fecha de Salida */}
                 <Box sx={{ position: 'relative', flex: 1, minWidth: '110px' }}>
                   <TextField
                     fullWidth
                     type="date"
                     value={fechaSalida}
-                    onChange={(e) => setFechaSalida(e.target.value)}
+                    onChange={(e) => {
+                      const nuevaFecha = e.target.value;
+                      setFechaSalida(nuevaFecha);
+                      // Si cambia la fecha y es igual a la de llegada, validar hora
+                      if (nuevaFecha === fechaLlegada && horaLlegada && horaSalida && horaSalida < horaLlegada) {
+                        setHoraSalida(horaLlegada);
+                      }
+                    }}
                     variant="outlined"
                     size="small"
                     className="bg-white rounded-lg"
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: fechaLlegada || new Date().toISOString().split('T')[0]
+                    }}
                     sx={{
                       '& input[type="date"]': {
                         position: 'relative',
@@ -427,18 +463,18 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                     }}
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start" sx={{ pr: 1 }}> {/* ← PADDING AQUÍ */}
+                        <InputAdornment position="start" sx={{ pr: 1 }}>
                           <CalendarTodayIcon fontSize="small" color="action" />
                         </InputAdornment>
                       ),
                     }}
                   />
-                  {/* Texto personalizado para mostrar la fecha - AJUSTADO */}
+                  {/* Texto personalizado para mostrar la fecha */}
                   <Box
                     sx={{
                       position: 'absolute',
                       top: '50%',
-                      left: '44px', // ← AUMENTADO de 32px a 44px
+                      left: '44px',
                       transform: 'translateY(-50%)',
                       zIndex: 1,
                       pointerEvents: 'none',
@@ -447,24 +483,30 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      width: 'calc(100% - 48px)', // ← AJUSTADO
+                      width: 'calc(100% - 48px)',
                     }}
                   >
                     {formatDateForDisplay(fechaSalida)}
                   </Box>
                 </Box>
                 
-                {/* Hora de Salida - CON PADDING */}
+                {/* Hora de Salida */}
                 <Box sx={{ position: 'relative', flex: 1, minWidth: '100px' }}>
                   <TextField
                     fullWidth
                     type="time"
                     value={horaSalida}
-                    onChange={(e) => setHoraSalida(e.target.value)}
+                    onChange={(e) => {
+                      const nuevaHora = validateHoraSalida(e.target.value);
+                      setHoraSalida(nuevaHora);
+                    }}
                     variant="outlined"
                     size="small"
                     className="bg-white rounded-lg"
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: fechaLlegada === fechaSalida ? horaLlegada || "00:00" : "00:00"
+                    }}
                     sx={{
                       '& input[type="time"]': {
                         position: 'relative',
@@ -494,18 +536,18 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                     }}
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start" sx={{ pr: 1 }}> {/* ← PADDING AQUÍ */}
+                        <InputAdornment position="start" sx={{ pr: 1 }}>
                           <AccessTimeIcon fontSize="small" color="action" />
                         </InputAdornment>
                       ),
                     }}
                   />
-                  {/* Texto personalizado para mostrar la hora - AJUSTADO */}
+                  {/* Texto personalizado para mostrar la hora */}
                   <Box
                     sx={{
                       position: 'absolute',
                       top: '50%',
-                      left: '44px', // ← AUMENTADO de 32px a 44px
+                      left: '44px',
                       transform: 'translateY(-50%)',
                       zIndex: 1,
                       pointerEvents: 'none',
@@ -514,7 +556,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      width: 'calc(100% - 48px)', // ← AJUSTADO
+                      width: 'calc(100% - 48px)',
                     }}
                   >
                     {formatTimeForDisplay(horaSalida)}
@@ -524,7 +566,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             </Box>
           )}
 
-          {/* Cantidad de Pasajeros - MÁS COMPACTO */}
+          {/* Cantidad de Pasajeros */}
           <Box className={isMobile ? "w-full" : ""} sx={{ 
             minWidth: isMobile ? '100%' : '150px',
             flexShrink: 0,
@@ -559,7 +601,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
             </FormControl>
           </Box>
 
-          {/* Botón BUSCAR - FIJO */}
+          {/* Botón BUSCAR */}
           <Box className={isMobile ? "w-full flex justify-center mt-1" : ""} sx={{ 
             minWidth: isMobile ? '100%' : '140px',
             flexShrink: 0,
@@ -587,7 +629,6 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
           </Box>
         </Stack>
         
-        {/* Contenedor para scroll en móvil cuando hay muchos campos */}
         {tipoTraslado === "ida-vuelta" && !isMobile && (
           <Box sx={{ 
             width: '100%', 
@@ -606,7 +647,7 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
               borderRadius: '3px',
             }
           }}>
-            <Box sx={{ height: '6px' }}></Box> {/* Espacio para el scroll */}
+            <Box sx={{ height: '6px' }}></Box>
           </Box>
         )}
       </Box>

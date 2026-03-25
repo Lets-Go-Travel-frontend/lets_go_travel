@@ -20,7 +20,6 @@ import HotelIcon from "@mui/icons-material/Hotel";
 
 import { RoomsGuestsSelector } from "./index";
 
-
 interface FinderFormProps {
   tipoViaje: string;
   onBuscar?: () => void;
@@ -55,12 +54,8 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
 
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   const handleRoomsGuestsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -184,6 +179,9 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
@@ -251,9 +249,21 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 borderColor: 'rgba(0, 0, 0, 0.23)',
                 color: '#000',
                 height: '40px',
+                backgroundColor: 'white',
                 '&:hover': {
+                  backgroundColor: 'white !important',
+                  borderColor: 'rgba(0, 0, 0, 1) !important',
+                },
+                '&.Mui-focusVisible': {
+                  backgroundColor: 'white',
+                },
+                '&:focus': {
+                  backgroundColor: 'white',
                   borderColor: 'rgba(0, 0, 0, 0.23)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                },
+                '&:active': {
+                  backgroundColor: 'white',
+                  borderColor: 'rgba(0, 0, 0, 0.23)',
                 }
               }}
               endIcon={<ArrowDropDownIcon />}

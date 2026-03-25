@@ -16,7 +16,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonIcon from "@mui/icons-material/Person";
-import PeopleIcon from "@mui/icons-material/People"; // Nuevo ícono para múltiples personas
+import PeopleIcon from "@mui/icons-material/People";
 
 interface FinderFormProps {
   tipoViaje: string;
@@ -43,15 +43,11 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
     }
   };
 
-  // Función para formatear la fecha en un placeholder personalizado
+  // Función para formatear la fecha en formato DD/MM/YYYY (corregida)
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Seleccionar fecha";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -97,17 +93,27 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 fullWidth
                 type="date"
                 value={fechaInicio}
-                onChange={(e) => setFechaInicio(e.target.value)}
+                onChange={(e) => {
+                  const nuevaFecha = e.target.value;
+                  setFechaInicio(nuevaFecha);
+                  // Si la fecha de inicio es posterior a la de término, resetear fecha de término
+                  if (fechaTermino && nuevaFecha > fechaTermino) {
+                    setFechaTermino("");
+                  }
+                }}
                 variant="outlined"
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0] 
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
                     zIndex: 2,
-                    color: 'transparent', // Oculta el texto nativo
-                    caretColor: '#000', // Muestra el cursor
+                    color: 'transparent',
+                    caretColor: '#000',
                     '&:focus': {
                       color: 'transparent',
                     },
@@ -189,12 +195,15 @@ export default function FinderForm({ tipoViaje, onBuscar }: FinderFormProps) {
                 size="small"
                 className="bg-white rounded-lg"
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: fechaInicio || new Date().toISOString().split('T')[0]
+                }}
                 sx={{
                   '& input[type="date"]': {
                     position: 'relative',
                     zIndex: 2,
-                    color: 'transparent', // Oculta el texto nativo
-                    caretColor: '#000', // Muestra el cursor
+                    color: 'transparent',
+                    caretColor: '#000',
                     '&:focus': {
                       color: 'transparent',
                     },
