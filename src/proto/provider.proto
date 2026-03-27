@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package provider;
+
+// ─── Mensajes de búsqueda ────────────────────────────────────────────────────
+
+message OccupancyRoom {
+  int32 adults = 1;
+  repeated int32 children_ages = 2;
+}
+
+message SearchRequest {
+  repeated string provider_ids = 1;
+  string check_in = 2;           // YYYY-MM-DD
+  string check_out = 3;          // YYYY-MM-DD
+  repeated OccupancyRoom occupancy = 4;
+}
+
+message PricingInfo {
+  double net_price = 1;
+  double gross_price = 2;
+  string currency = 3;           // ISO 4217
+  bool is_direct_payment = 4;
+  bool is_binding_rate = 5;
+  double pay_at_hotel = 6;
+}
+
+message CancellationPolicy {
+  string penalty_start_date = 1; // YYYY-MM-DD
+  double penalty_amount = 2;
+  string free_cancellation_until = 3;
+}
+
+message SearchResult {
+  string provider_item_id = 1;
+  string item_name = 2;
+  PricingInfo pricing = 3;
+  string booking_token = 4;
+  CancellationPolicy cancellation_policy = 5;
+  string essential_info = 6;
+}
+
+message SearchResponse {
+  string provider_name = 1;
+  repeated SearchResult items = 2;
+}
+
+// ─── Mensajes de reserva ──────────────────────────────────────────────────────
+
+message PassengerData {
+  string first_name = 1;
+  string last_name = 2;
+  string document_type = 3;
+  string document_number = 4;
+  string date_of_birth = 5;
+  string nationality = 6;
+}
+
+message BookRequest {
+  string booking_token = 1;
+  repeated PassengerData passengers = 2;
+}
+
+message BookResponse {
+  string confirmation_id = 1;
+  string provider_name = 2;
+}
+
+// ─── Cancelación ──────────────────────────────────────────────────────────────
+
+message CancelRequest {
+  string confirmation_id = 1;
+}
+
+message CancelResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+// ─── Detalle de item ──────────────────────────────────────────────────────────
+
+message DetailsRequest {
+  string provider_item_id = 1;
+}
+
+message DetailsResponse {
+  SearchResult item = 1;
+}
+
+// ─── Servicio principal ───────────────────────────────────────────────────────
+
+service ProviderService {
+  rpc SearchAvailability (SearchRequest) returns (SearchResponse);
+  rpc GetDetails (DetailsRequest) returns (DetailsResponse);
+  rpc Book (BookRequest) returns (BookResponse);
+  rpc Cancel (CancelRequest) returns (CancelResponse);
+}

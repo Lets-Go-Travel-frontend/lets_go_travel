@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "paths": {
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@errors/*": ["./src/errors/*"],
+      "@http/*": ["./src/http/*"],
+      "@auth/*": ["./src/auth/*"],
+      "@flows/*": ["./src/flows/*"],
+      "@catalog/*": ["./src/catalog/*"],
+      "@cache/*": ["./src/cache/*"],
+      "@middleware/*": ["./src/middleware/*"]
+    },
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

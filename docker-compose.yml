@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  ms-veturis:
+    build: .
+    ports:
+      - "${PORT_REST:-3001}:3001"
+      - "${PORT_GRPC:-50052}:50052"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev

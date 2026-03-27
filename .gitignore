@@ -1,0 +1,27 @@
+# Dependencias Locales
+node_modules/
+dist/
+coverage/
+.serverless/
+.webpack/
+
+# Configuración Sensible (Únicamente esto)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
+# Logs locales del microservicio
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

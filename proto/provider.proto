@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package provider;
+
+service ProviderService {
+  rpc SearchAvailability (SearchRequest) returns (SearchResponse);
+  rpc GetDetails (DetailsRequest) returns (DetailsResponse);
+  rpc Book (BookRequest) returns (BookResponse);
+  rpc Cancel (CancelRequest) returns (CancelResponse);
+  rpc ListBookings (ListBookingsRequest) returns (ListBookingsResponse);
+}
+
+// --- Requests ---
+
+message SearchRequest {
+  string checkIn = 1;      // ISO 8601 (YYYY-MM-DD)
+  string checkOut = 2;     // ISO 8601 (YYYY-MM-DD)
+  string destinationId = 3;
+  repeated Occupancy occupancies = 4;
+  map<string, string> extraData = 5; // Para countryCode, etc.
+}
+
+message DetailsRequest {
+  string bookingToken = 1;
+}
+
+message BookRequest {
+  string bookingToken = 1;
+  repeated Passenger passengers = 2;
+  string holderName = 3;
+  string holderSurname = 4;
+  string email = 5;
+  string clientReferenceId = 6;
+  map<string, string> extraData = 7;
+  string comments = 8;
+}
+
+message CancelRequest {
+  string confirmationId = 1;
+  string securityCode = 2;
+}
+
+message ListBookingsRequest {
+  string fromDate = 1;     // YYYY-MM-DD
+  string toDate = 2;       // YYYY-MM-DD
+  string status = 3;       // C, A, etc.
+}
+
+// --- Responses ---
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message DetailsResponse {
+  SearchResult result = 1;
+}
+
+message BookResponse {
+  string confirmationId = 1;
+  string status = 2;
+  PricingInfo pricing = 3;
+  CancellationPolicy cancellationPolicy = 4;
+  string securityCode = 5;
+}
+
+message ListBookingsResponse {
+  repeated BookResponse bookings = 1;
+}
+
+message CancelResponse {
+  string status = 1;
+  string cancellationId = 2;
+}
+
+// --- Common Types ---
+
+message Occupancy {
+  int32 adults = 1;
+  repeated int32 childrenAges = 2;
+}
+
+message Passenger {
+  string firstName = 1;
+  string lastName = 2;
+  string documentNumber = 3;
+  string birthDate = 4;     // ISO 8601
+  string type = 5;          // ADULT, CHILD
+}
+
+message SearchResult {
+  string providerItemId = 1;
+  string itemName = 2;
+  string itemDescription = 3;
+  PricingInfo pricing = 4;
+  string bookingToken = 5;
+  CancellationPolicy cancellationPolicy = 6;
+}
+
+message PricingInfo {
+  double netPrice = 1;
+  double grossPrice = 2;
+  string currency = 3;      // ISO 4217
+  bool isBindingRate = 4;
+  bool isDirectPayment = 5;
+}
+
+message CancellationPolicy {
+  string penaltyStartDate = 1; // ISO 8601
+  double penaltyAmount = 2;
+  string currency = 3;
+}
