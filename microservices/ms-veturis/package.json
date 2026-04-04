@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
     "dev": "ts-node src/server.ts",
     "build": "tsc",
     "gen-proto": "npx proto-loader-gen-types --keepCase --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/interfaces/gen/ src/interfaces/gen/provider.proto"

@@ -1,54 +1,70 @@
-# 🏨 Let's Go Travel - Veturis GDS Adapter (V3.9)
+# Lets Go Travel - GDS Integration Suite 🌍
 
-Este microservicio es un adaptador **Stateless** basado en la arquitectura **Hollow Shell**. Traduce peticiones gRPC/REST al protocolo XML de Veturis V3.9 de forma ultrarrápida y segura, delegando la lógica de negocio al Centralizador.
+Este repositorio contiene la arquitectura centralizada de integración con Proveedores Globales de Distribución (GDS) para **Let's Go Travel**. La solución está diseñada bajo el patrón **Hollow Shell**, garantizando una traducción pura entre protocolos (gRPC/REST) y los servicios nativos de los proveedores (Veturis XML).
+
+## 🏗️ Arquitectura del Sistema
+
+El sistema opera mediante un **Modo Dual**:
+1.  **Capa gRPC (Interna):** Puerto `50052`. Diseñada para consumo de alta eficiencia entre microservicios core.
+2.  **Capa REST Bridge (Frontend):** Puerto `3005`. Un puente HTTP diseñado específicamente para la compatibilidad con el frontend en Next.js, permitiendo búsquedas, detalles y reservas sin configuración gRPC en el cliente.
+
+### 🛡️ PII Shield & Seguridad
+Todos los logs transaccionales pasan por un filtro de privacidad que redacta información sensible (nombres, documentos, tarjetas, emails) antes de ser impresos o almacenados.
 
 ---
 
-## 🚀 1. Despliegue y Configuración
+## 📂 Estructura del Proyecto
 
-El servicio depende de variables de entorno y de una caché Redis para su máxima eficiencia. Toda la configuración base y requerida se encuentra explicada en `microservices/ms-veturis/.env.example`.
+```text
+lets_go_travel/
+├── microservices/
+│   └── ms-veturis/          # Microservicio Adaptador Veturis
+│       ├── src/
+│       │   ├── api/         # Cliente nativo XML (Axios)
+│       │   ├── services/    # Lógica de traducción Hollow Shell
+│       │   ├── interfaces/  # Contratos gRPC y Esquemas Zod
+│       │   └── etl/         # Ingestión de catálogos estáticos (CSV -> Redis)
+├── app/                     # Frontend Next.js
+│   ├── components/          # UI Modular (HotelCard, Results)
+│   ├── hooks/               # useCentralizer (Puente con microservicios)
+│   └── types/               # Tipado estándar para toda la plataforma
+├── gds-contracts/           # Manuales oficiales y Colecciones Postman
+└── public/                  # Assets estáticos y multimedia
+```
 
-### Ingesta de Datos Estáticos (ETL)
-Para que el microservicio funcione sin latencia, Redis debe estar poblado con el catálogo de hoteles (los 10 archivos CSV de Veturis).
+---
+
+## 🚀 Instalación y Configuración
+
+### Requisitos Previos
+- **Node.js** v20+
+- **Redis** (ejecutándose en `localhost:6379` para el catálogo de hoteles)
+- **Credenciales Veturis** (XML v3.9)
+
+### Paso 1: Microservicio ms-veturis
 ```bash
 cd microservices/ms-veturis
-npm run etl:ingest
+npm install
+cp .env.example .env # Configura tus credenciales reales aquí
+npm run dev
 ```
-*Recomendación:* Ejecutar este script mediante un Cronjob una vez al día para mantener los hoteles actualizados.
+
+### Paso 2: Frontend (Next.js)
+```bash
+cd ../../
+npm install
+npm run dev
+```
+El frontend estará disponible en [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 🔗 2. Integración para el Centralizador
+## 🛠️ Comandos Principales
 
-El sistema expone dos protocolos idénticos en estructura:
-1. **gRPC (Producción):** Puerto `50052`. El contrato fuente es `microservices/ms-veturis/src/interfaces/gen/provider.proto`.
-2. **REST Bridge (Pruebas/UI):** Puerto `3005`. Requiere Header `x-api-key` definido en `BRIDGE_API_KEY`.
+- `npm run build`: Compilación de TypeScript y verificación de tipos.
+- `npm run gen-proto`: Regenera las interfaces de TypeScript a partir de `provider.proto`.
 
-### Flujo Transaccional "Safe-Path"
-
-#### A. Búsqueda (`/search` o `SearchAvailability`)
-*   **Performance:** Respuesta en `O(1)` con datos enriquecidos desde Redis.
-*   **Datos Adicionales:** Recibirás `lat`, `lng` y `amenities` descifradas en lenguaje natural (ej. "WiFi").
-*   **Guardrails:** Límite estricto de 5 habitaciones, 6 adultos y 3 niños por petición, según dicta Veturis.
-
-#### B. Detalles (`/details` o `GetDetails`) - *Paso Crítico*
-*   **Pago Directo:** Si un suplemento en `extraData.supplements` tiene `type: "D"`, es un importe a abonar directamente en el hotel. El precio base `price` NO lo incluye.
-*   **Cancelación:** `freeCancellationUntil` te dice exactamente la fecha y hora límite sin gastos.
-*   **Saldo:** Devuelve `agencyBalance` para validar disponibilidad de crédito antes de intentar reservar.
-
-#### C. Reserva (`/book` o `Book`)
-*   **Facturación B2B:** Si envías el objeto `company` (name, cif, address), se inyectan los nodos fiscales en Veturis para la factura.
-*   **Cambio de Precio:** Si en `Details` detectaste `priceChangeInfo.hasChanged: true`, debes enviar `acceptedPriceChange` con el nuevo valor aquí, o Veturis rechazará la transacción.
-
-#### D. Cancelación y Modificación
-*   **Cancelación en 2 pasos:** Llama a `/cancel` con `confirm: false` para cotizar los gastos de anulación. Llama con `confirm: true` para anular definitivamente.
-*   **Modificación:** El endpoint `/modify` permite cambiar el nombre de un pasajero o añadir comentarios al hotel sin necesidad de cancelar la reserva.
-
----
-
-## 🛡️ 3. Seguridad y Resiliencia
-
-*   **PII Shield:** Los logs aplican ofuscación parcial automática (`j***@email.com`, `123****X`). Los XMLs crudos con datos personales nunca se imprimen para cumplir con el GDPR.
-*   **Circuit Breaker & Retries:** El cliente HTTP implementa 1 reintento automático silencioso en caso de micro-caídas del GDS (Timeout o Error 503).
-*   **Healthcheck (`GET /health`):** Verifica conexión viva TCP con Veturis (puerto 443) y con Redis. Si alguno falla, devuelve `503 DEGRADED`.
-*   **Errores Inteligentes:** Los fallos crípticos del GDS (ej. Error 1824) son interceptados con Regex y devuelven el campo exacto que falta (`GDS_VALIDATION_ERROR`). Si una cancelación falla por red, devuelve `ERROR_INDETERMINATE` (requiere alerta manual para agente humano, no asumir ningún estado).
+## 📝 Notas de Implementación
+- El sistema utiliza **Zod** para la validación estricta de contratos en el Bridge REST.
+- Las edades de los niños son obligatorias si el conteo de niños es mayor a 0.
+- El catálogo de hoteles se actualiza mediante un Job de ETL diario (configurable en `EtlJob.ts`).

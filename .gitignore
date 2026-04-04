@@ -42,6 +42,11 @@ next-env.d.ts
 # deprecated code
 /deprecated/
 
+# Internal Knowledge, Strategy & Sprints
+LEER_ANTES_DE_EMPEZAR/
+knowledge/
+sprints/
+
 # Data and Logs
 **/data/*.csv
 **/*.log
