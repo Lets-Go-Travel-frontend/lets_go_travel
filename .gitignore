@@ -47,7 +47,13 @@ LEER_ANTES_DE_EMPEZAR/
 knowledge/
 sprints/
 
-# Data and Logs
-**/data/*.csv
-**/*.log
+# GDS Contracts & Manuals
+gds-contracts/
+*.pdf
+*.postman_collection.json
+
+# Data, Logs and Databases
+**/data/
 *.csv
+*.log
+*.sqlite
