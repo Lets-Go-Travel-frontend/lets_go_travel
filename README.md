@@ -64,7 +64,7 @@ El frontend estará disponible en [http://localhost:3000](http://localhost:3000)
 - `npm run build`: Compilación de TypeScript y verificación de tipos.
 - `npm run gen-proto`: Regenera las interfaces de TypeScript a partir de `provider.proto`.
 
-## 📝 Notas de Implementación
-- El sistema utiliza **Zod** para la validación estricta de contratos en el Bridge REST.
-- Las edades de los niños son obligatorias si el conteo de niños es mayor a 0.
-- El catálogo de hoteles se actualiza mediante un Job de ETL diario (configurable en `EtlJob.ts`).
+## ⚙️ Configuración Técnica
+- El sistema utiliza **Zod** para la validación de contratos en el Bridge REST.
+- El catálogo de hoteles se actualiza mediante un Job de ETL diario en `EtlJob.ts`.
+- La arquitectura **Hollow Shell** garantiza que el adaptador sea un traductor puro sin lógica de negocio.

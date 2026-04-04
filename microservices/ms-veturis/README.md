@@ -59,4 +59,10 @@ Este proceso ocurre automáticamente todos los días a las **02:00 AM UTC** medi
 ---
 
 ## 🛡️ Anti-Any Law Compliance
-Este microservicio cumple con el estándar de **Zero Any**. No se permite el uso del tipo `any` en la lógica de negocio ni en los mappers, garantizando que el sistema sea 100% Type-Safe y resiliente.
+Este microservicio implementa una política de **Zero Any**. La lógica de traducción y mappers utiliza interfaces estrictas para garantizar la integridad de los datos.
+
+## 🧪 Validación de Integridad
+Para ejecutar la suite de pruebas técnicas:
+```bash
+npm run test
+```

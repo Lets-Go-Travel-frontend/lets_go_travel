@@ -33,7 +33,7 @@ const maskString = (value: string, type: string): string => {
     }
 };
 
-const sanitize = (obj: unknown): unknown => {
+export const sanitize = (obj: unknown): unknown => {
     if (obj === null || typeof obj !== 'object') {
         return obj;
     }

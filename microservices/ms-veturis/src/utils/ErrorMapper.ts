@@ -82,6 +82,15 @@ export class ErrorMapper {
             };
         }
 
+        if (err.includes('ERROR 1825')) {
+            return {
+                type: GdsErrorType.AVAILABILITY,
+                message: 'No hay disponibilidad para los criterios seleccionados en el GDS.',
+                rawProviderError: veturisError,
+                isRecoverable: false
+            };
+        }
+
         // Errores genéricos
         return {
             type: GdsErrorType.UNKNOWN,

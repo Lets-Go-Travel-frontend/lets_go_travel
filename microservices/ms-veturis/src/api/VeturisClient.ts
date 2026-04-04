@@ -71,12 +71,12 @@ export class VeturisClient {
     }
 
     public encodeBookingToken(sessionId: string, roomId: string): string {
-        return Buffer.from(`${sessionId}|${roomId}`).toString('base64');
+        return Buffer.from(`${sessionId}:::${roomId}`).toString('base64');
     }
 
     public decodeBookingToken(token: string): { sessionId: string, roomId: string } {
         const decoded = Buffer.from(token, 'base64').toString('ascii');
-        const [sessionId, roomId] = decoded.split('|');
+        const [sessionId, roomId] = decoded.split(':::');
         return { sessionId, roomId };
     }
 
