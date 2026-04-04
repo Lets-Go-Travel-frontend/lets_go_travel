@@ -11,6 +11,8 @@ export interface IVeturisRawSearchResponse {
 export interface IVeturisRawHotel {
     Id: string;
     HotelDetails: {
+        ID?: string;
+        Id?: string;
         Name: string;
     };
     Accommodations: {
@@ -48,33 +50,18 @@ export interface IVeturisRawBoard {
 export interface IVeturisRawDetailsResponse {
     AdditionalInformationRS: {
         $: { currency?: string };
+        SessionId?: string;
+        SessionID?: string;
+        obj?: string;
         HotelDetails: {
+            ID: string;
             Name: string;
+            Address?: string;
+            City?: string;
         };
+        fechaLimiteSinGastos?: string;
         Rooms: {
-            Room: {
-                Refundable: string;
-                Cancellation: {
-                    Period: {
-                        From: string;
-                        To: string;
-                        PriceAgency: string;
-                    } | Array<{
-                        From: string;
-                        To: string;
-                        PriceAgency: string;
-                    }>;
-                };
-                PriceAgency: string;
-                Price: string;
-            } | Array<{
-                Refundable: string;
-                Cancellation: {
-                    Period: any; 
-                };
-                PriceAgency: string;
-                Price: string;
-            }>;
+            Room: IVeturisDetailsRoom | IVeturisDetailsRoom[];
         };
         EssentialInformation?: {
             Information: {
@@ -83,10 +70,44 @@ export interface IVeturisRawDetailsResponse {
         };
         MandatoryPaxes?: 'Y' | 'N' | 'H';
         PriceChange?: string;
+        AgencyBalance?: string;
         Error?: string;
         ERROR?: string;
         PriceAgency: string;
     };
+}
+
+export interface IVeturisDetailsRoom {
+    Refundable: string;
+    Cancellation: {
+        Period: IVeturisCancellationPeriod | IVeturisCancellationPeriod[];
+    };
+    PriceAgency: string;
+    Price: string;
+    Supplements?: {
+        Supplement: IVeturisSupplement | IVeturisSupplement[];
+    };
+    Discounts?: {
+        Discount: IVeturisDiscount | IVeturisDiscount[];
+    };
+}
+
+export interface IVeturisCancellationPeriod {
+    From: string;
+    To: string;
+    PriceAgency: string;
+    Amount?: string;
+}
+
+export interface IVeturisSupplement {
+    Description: string;
+    Price: string;
+    Type: string;
+}
+
+export interface IVeturisDiscount {
+    Description: string;
+    Price: string;
 }
 
 export interface IVeturisRawBookingResponse {

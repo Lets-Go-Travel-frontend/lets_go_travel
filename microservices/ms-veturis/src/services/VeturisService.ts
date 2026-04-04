@@ -7,7 +7,8 @@ import {
     IVeturisRawHotel, 
     IVeturisRawRoom, 
     IVeturisRawBoard,
-    IVeturisRawBookingResponse
+    IVeturisRawBookingResponse,
+    IVeturisRawDetailsResponse
 } from '../interfaces/veturis/IVeturisRawResponse';
 import { SearchRequestParams } from '../interfaces/schemas/SearchSchema';
 import { DetailsResponse, DetailsResponseSchema } from '../interfaces/schemas/DetailsSchema';
@@ -27,33 +28,38 @@ export class VeturisService {
         this.client = new VeturisClient();
     }
 
-    public getHotels(page: number = 1, limit: number = 20): { hotels: any[], total: number } {
+    public async getHotels(page: number = 1, limit: number = 20): Promise<{ hotels: any[], total: number }> {
         const csvPath = path.resolve(__dirname, '../../data/veturis_hotels.csv');
         if (!fs.existsSync(csvPath)) return { hotels: [], total: 0 };
 
-        const allHotels: any[] = [];
-        const content = fs.readFileSync(csvPath, 'utf8');
-        const lines = content.split('\n');
+        try {
+            const content = await fs.promises.readFile(csvPath, 'utf8');
+            const lines = content.split('\n');
+            const allHotels: any[] = [];
 
-        for (const line of lines) {
-            if (!line.trim()) continue;
-            const parts = line.split('|');
-            if (parts.length > 5) {
-                allHotels.push({
-                    id: parts[0],
-                    name: parts[1],
-                    category: parts[5],
-                    address: parts[6],
-                    city: parts[8]
-                });
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const parts = line.split('|');
+                if (parts.length > 5) {
+                    allHotels.push({
+                        id: parts[0],
+                        name: parts[1],
+                        category: parts[5],
+                        address: parts[6],
+                        city: parts[8]
+                    });
+                }
             }
-        }
 
-        const start = (page - 1) * limit;
-        return {
-            hotels: allHotels.slice(start, start + limit),
-            total: allHotels.length
-        };
+            const start = (page - 1) * limit;
+            return {
+                hotels: allHotels.slice(start, start + limit),
+                total: allHotels.length
+            };
+        } catch (error) {
+            safeLog('❌ Error reading local catalog', error);
+            return { hotels: [], total: 0 };
+        }
     }
 
     private mapCategoryToStars(categoryId: string): number {
@@ -123,21 +129,21 @@ export class VeturisService {
             }
 
             const rawData = await this.client.parseXML<Record<string, any>>(xmlResponse);
-            if (!rawData || (rawData.resultadosRS as any)?.Error || (rawData.SearchAvailabilityRS as any)?.Error) {
-                 const errText = (rawData.resultadosRS as any)?.Error || (rawData.SearchAvailabilityRS as any)?.Error || 'Unknown';
+            const rs = (rawData.resultadosRS || rawData.SearchAvailabilityRS) as any;
+            if (!rs || rs.Error) {
+                 const errText = rs?.Error || 'Unknown';
                  const mappedErr = ErrorMapper.map(errText);
                  throw new Error(`VeturisAPIError: ${mappedErr.message}`);
             }
 
-            const globalCurrency = rawData.resultadosRS?.$?.currency || 'EUR';
+            const globalCurrency = rs?.$?.currency || 'EUR';
             const items: IStandardResult[] = [];
-            const rs = rawData.resultadosRS || rawData.SearchAvailabilityRS;
             const hotelsRaw = rs.Hotels?.Hotel || rs.HotelList?.Hotel;
 
             if (hotelsRaw) {
                 const hotels: IVeturisRawHotel[] = Array.isArray(hotelsRaw) ? (hotelsRaw as IVeturisRawHotel[]) : [hotelsRaw as IVeturisRawHotel];
                 for (const h of hotels) {
-                    const hotelId = h.Id || (h as any).HotelDetails?.ID || (h as any).HotelDetails?.Id;
+                    const hId = h.Id || h.HotelDetails?.ID || h.HotelDetails?.Id;
                     const accsRaw = h.Accommodations?.Room;
                     const rooms: IVeturisRawRoom[] = Array.isArray(accsRaw) ? (accsRaw as IVeturisRawRoom[]) : (accsRaw ? [accsRaw as IVeturisRawRoom] : []);
                     for (const r of rooms) {
@@ -147,17 +153,17 @@ export class VeturisService {
                         for (const b of boards) {
                             const net = parseFloat(b.PriceAgency);
                             let gross = 0;
-                            if (typeof b.Price === 'object') gross = parseFloat((b.Price as any)._);
+                            if (typeof b.Price === 'object') gross = parseFloat(b.Price._);
                             else gross = parseFloat(b.Price);
                             
-                            const gdsHotelName = h.HotelDetails?.Name || (h as any).HotelDetails?.Name || 'Veturis Hotel';
-                            const meta = await this.getHotelMeta(hotelId || '0');
+                            const gdsHotelName = h.HotelDetails?.Name || 'Veturis Hotel';
+                            const meta = await this.getHotelMeta(hId || '0');
                             const amenitiesRaw = r.RoomType?.Amenities?.Amenity;
-                            const amenityIds = Array.isArray(amenitiesRaw) ? amenitiesRaw.map(a => a.ID).join(',') : (amenitiesRaw ? (amenitiesRaw as any).ID : '');
+                            const amenityIds = Array.isArray(amenitiesRaw) ? amenitiesRaw.map(a => a.ID).join(',') : (amenitiesRaw ? amenitiesRaw.ID : '');
                             const amenityNames = await this.getAmenities(amenityIds);
                             
                             items.push({
-                                hotelId: hotelId || '0',
+                                hotelId: hId || '0',
                                 hotelName: meta.name !== 'Unknown Hotel' ? meta.name : gdsHotelName,
                                 stars: meta.stars || 0,
                                 imageUrl: meta.imageUrl,
@@ -170,7 +176,7 @@ export class VeturisService {
                                     netPrice: net,
                                     grossPrice: gross || net, 
                                     currency: b.Currency || globalCurrency,
-                                    isBindingRate: typeof b.Price === 'object' ? (b.Price as any).$?.mandatory === "1" : false
+                                    isBindingRate: typeof b.Price === 'object' ? b.Price.$?.mandatory === "1" : false
                                 },
                                 cancellationPolicy: {
                                     refundable: b.Refundable === 'Y',
@@ -212,11 +218,11 @@ export class VeturisService {
 
         const xmlRQ = this.client.buildXML(request);
         const xmlResponse = await this.client.sendMultipartXML(xmlRQ);
-        const raw = await this.client.parseXML<Record<string, any>>(xmlResponse);
+        const raw = await this.client.parseXML<IVeturisRawDetailsResponse>(xmlResponse);
 
-        const rs = raw.AdditionalInformationRS as Record<string, any>;
+        const rs = raw.AdditionalInformationRS;
         if (rs?.Error || rs?.ERROR) {
-            const mappedErr = ErrorMapper.map(rs.Error || rs.ERROR);
+            const mappedErr = ErrorMapper.map(rs.Error || rs.ERROR || 'Unknown Details Error');
             throw new Error(`GDS_DETAILS_ERROR: ${mappedErr.message}`);
         }
 
@@ -233,7 +239,7 @@ export class VeturisService {
         const response: DetailsResponse = {
             status: 'DETAILS_CONFIRMED',
             price: parseFloat(rs.PriceAgency),
-            currency: rs.$?.currency || 'EUR', 
+            currency: rs.$.currency || 'EUR', 
             hotelName: rs.HotelDetails?.Name,
             description: hotelDesc,
             address: rs.HotelDetails?.Address,

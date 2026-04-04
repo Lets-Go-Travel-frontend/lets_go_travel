@@ -149,7 +149,7 @@ const startRestBridge = () => {
                 const url = new URL(req.url, `http://${req.headers.host}`);
                 const page = parseInt(url.searchParams.get('page') || '1');
                 const limit = parseInt(url.searchParams.get('limit') || '20');
-                const data = vetService.getHotels(page, limit);
+                const data = await vetService.getHotels(page, limit);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(data));
             } catch (err: any) {

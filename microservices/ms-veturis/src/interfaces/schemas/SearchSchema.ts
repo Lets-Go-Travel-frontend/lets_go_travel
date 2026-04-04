@@ -20,7 +20,7 @@ export const SearchSchema = z.object({
   checkOut: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format must be YYYY-MM-DD"),
   language: z.string().optional().default('SPA'),
   occupancies: z.array(OccupancySchema).min(1, "At least one occupancy is required"),
-  countryCode: z.string().length(3).optional()
+  countryCode: z.string().min(2).max(3).optional()
 }).refine((data) => {
   const checkInDate = new Date(data.checkIn);
   const checkOutDate = new Date(data.checkOut);

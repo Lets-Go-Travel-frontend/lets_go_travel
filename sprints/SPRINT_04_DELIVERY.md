@@ -13,10 +13,10 @@ Se cerrará el fichero `.proto` con todas las extensiones B2B y se generará un 
 **Prioridad:** CRITICAL
 
 ### Tasks:
-- [ ] **Task 1.1:** Validar que `provider.proto` tenga los campos `company` (name, cif, address) y `agencyReference`.
-- [ ] **Task 1.2:** Validar que el mensaje `Passenger` incluya `expirationDocumentDate`.
-- [ ] **Task 1.3:** Ejecutar `npm run gen-proto` y verificar que los tipos TypeScript en `src/interfaces/gen/` coinciden al 100% con la lógica del Service.
-- [ ] **Task 1.4:** Comprobar que todos los RPCs (`Search`, `Details`, `Book`, `Cancel`) están correctamente tipados sin usar `any`.
+- [x] **Task 1.1:** Validar que `provider.proto` tenga los campos `company` (name, cif, address) y `agencyReference`.
+- [x] **Task 1.2:** Validar que el mensaje `Passenger` incluya `expirationDocumentDate`.
+- [x] **Task 1.3:** Ejecutar `npm run gen-proto` y verificar que los tipos TypeScript en `src/interfaces/gen/` coinciden al 100% con la lógica del Service.
+- [x] **Task 1.4:** Comprobar que todos los RPCs (`Search`, `Details`, `Book`, `Cancel`) están correctamente tipados sin usar `any`.
 
 ---
 
@@ -25,9 +25,9 @@ Se cerrará el fichero `.proto` con todas las extensiones B2B y se generará un 
 **Prioridad:** LOW
 
 ### Tasks:
-- [ ] **Task 2.1:** Limpiar la UI del Sandbox para que solo muestre campos que realmente se envían al GDS.
-- [ ] **Task 2.2:** Añadir un visualizador de JSON "Raw" para que el desarrollador pueda ver exactamente qué está enviando el Microservicio al GDS.
-- [ ] **Task 2.3:** Eliminar cualquier botón de "Skip Validation" o bypass de seguridad que se haya usado en desarrollo.
+- [x] **Task 2.1:** Limpiar la UI del Sandbox para que solo muestre campos que realmente se envían al GDS.
+- [x] **Task 2.2:** Añadir un visualizador de JSON "Raw" para que el desarrollador pueda ver exactamente qué está enviando el Microservicio al GDS.
+- [x] **Task 2.3:** Eliminar cualquier botón de "Skip Validation" o bypass de seguridad que se haya usado en desarrollo.
 
 ---
 
@@ -36,7 +36,7 @@ Se cerrará el fichero `.proto` con todas las extensiones B2B y se generará un 
 **Prioridad:** HIGH
 
 ### Tasks:
-- [ ] **Task 3.1:** Crear `README_PRODUCCION.md` con la lista de variables de entorno reales.
-- [ ] **Task 3.2:** Documentar el flujo de error: mapeo de códigos numéricos de Veturis a tipos `GdsErrorType`.
-- [ ] **Task 3.3:** Añadir instrucciones para la ejecución del ETL: frecuencia recomendada y gestión de logs de error en Redis.
-- [ ] **Task 3.4:** Generar un esquema de arquitectura final para el proyecto representativo de la "Hollow Shell".
+- [x] **Task 3.1:** Crear `README_PRODUCCION.md` con la lista de variables de entorno reales.
+- [x] **Task 3.2:** Documentar el flujo de error: mapeo de códigos numéricos de Veturis a tipos `GdsErrorType`.
+- [x] **Task 3.3:** Añadir instrucciones para la ejecución del ETL: frecuencia recomendada y gestión de logs de error en Redis.
+- [x] **Task 3.4:** Generar un esquema de arquitectura final para el proyecto representativo de la "Hollow Shell".

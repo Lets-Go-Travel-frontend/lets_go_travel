@@ -12,9 +12,9 @@ El flujo de reserva de Veturis tiene trampas: el precio puede cambiar en el últ
 **Prioridad:** HIGH
 
 ### Tasks:
-- [ ] **Task 1.1:** Auditar Pág 28 del manual. Identificar el nodo `<PriceChange>` en el XML de respuesta de Detalles.
-- [ ] **Task 1.2:** Mapear este nodo a un objeto `priceChangeInfo` con `hasChanged: true` y el nuevo valor.
-- [ ] **Task 1.3:** Permitir que el Centralizador acepte el nuevo precio enviando el flag `acceptedPriceChange` en el paso de reserva.
+- [x] **Task 1.1:** Auditar Pág 28 del manual. Identificar el nodo `<PriceChange>` en el XML de respuesta de Detalles.
+- [x] **Task 1.2:** Mapear este nodo a un objeto `priceChangeInfo` con `hasChanged: true` y el nuevo valor.
+- [x] **Task 1.3:** Permitir que el Centralizador acepte el nuevo precio enviando el flag `acceptedPriceChange` en el paso de reserva.
 
 ---
 
@@ -23,9 +23,9 @@ El flujo de reserva de Veturis tiene trampas: el precio puede cambiar en el últ
 **Prioridad:** CRITICAL
 
 ### Tasks:
-- [ ] **Task 2.1:** Detectar en `AdditionalInformationRS` cualquier suplemento con `Type="D"`.
-- [ ] **Task 2.2:** Inyectar el campo `isDirectPayment: true` en el JSON de respuesta.
-- [ ] **Task 2.3:** Añadir un mensaje descriptivo: "Importe a abonar directamente en el establecimiento".
+- [x] **Task 2.1:** Detectar en `AdditionalInformationRS` cualquier suplemento con `Type="D"`.
+- [x] **Task 2.2:** Inyectar el campo `isDirectPayment: true` en el JSON de respuesta.
+- [x] **Task 2.3:** Añadir un mensaje descriptivo: "Importe a abonar directamente en el establecimiento".
 
 ---
 
@@ -34,6 +34,6 @@ El flujo de reserva de Veturis tiene trampas: el precio puede cambiar en el últ
 **Prioridad:** HIGH
 
 ### Tasks:
-- [ ] **Task 4.1:** Implementar validación en `SearchRequest`: Máx 5 habitaciones, 6 adultos y 3 niños por ocupación.
-- [ ] **Task 4.2:** Mapear el campo `<MandatoryPaxes>` (Y/N/H) en la respuesta de Detalles (Pág 29).
-- [ ] **Task 4.3:** Validar que si `MandatoryPaxes="Y"`, todos los pasajeros enviados en el paso de reserva tengan nombre y apellido.
+- [x] **Task 4.1:** Implementar validación en `SearchRequest`: Máx 5 habitaciones, 6 adultos y 3 niños por ocupación.
+- [x] **Task 4.2:** Mapear el campo `<MandatoryPaxes>` (Y/N/H) en la respuesta de Detalles (Pág 29).
+- [x] **Task 4.3:** Validar que si `MandatoryPaxes="Y"`, todos los pasajeros enviados en el paso de reserva tengan nombre y apellido.

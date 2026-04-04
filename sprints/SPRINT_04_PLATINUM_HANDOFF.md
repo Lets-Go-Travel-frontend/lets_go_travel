@@ -12,11 +12,11 @@ Un producto profesional se entrega con instrucciones claras. El equipo del Centr
 **Prioridad:** HIGH
 
 ### Tasks:
-- [ ] **Task 1.1:** Crear `KNOWLEDGE_VETURIS.md` consolidando:
+- [x] **Task 1.1:** Crear `KNOWLEDGE_VETURIS.md` consolidando:
     - La tabla de amenities mapeada.
     - Cómo interpretar el `isDirectPayment`.
     - Guía de manejo del `bookingToken` (SessionID).
-- [ ] **Task 1.2:** Explicar el flujo de cancelación en 2 pasos (Quoted vs Confirmed).
+- [x] **Task 1.2:** Explicar el flujo de cancelación en 2 pasos (Quoted vs Confirmed).
 
 ---
 
@@ -25,9 +25,9 @@ Un producto profesional se entrega con instrucciones claras. El equipo del Centr
 **Prioridad:** CRITICAL
 
 ### Tasks:
-- [ ] **Task 2.1:** Configurar un script `npm run build:proto` que automatice la generación de tipos.
-- [ ] **Task 2.2:** Asegurar que los ficheros generados sean compatibles con el entorno de despliegue final.
-- [ ] **Task 2.3:** Realizar un "Dry Run" de la IP Dedicada: validar que el adaptador responde 403 desde cualquier otra IP.
+- [x] **Task 2.1:** Configurar un script `npm run build:proto` que automatice la generación de tipos.
+- [x] **Task 2.2:** Asegurar que los ficheros generados sean compatibles con el entorno de despliegue final.
+- [x] **Task 2.3:** Realizar un "Dry Run" de la IP Dedicada: validar que el adaptador responde 403 desde cualquier otra IP.
 
 ---
 
@@ -36,6 +36,6 @@ Un producto profesional se entrega con instrucciones claras. El equipo del Centr
 **Prioridad:** HIGH
 
 ### Tasks:
-- [ ] **Task 3.1:** Verificar que no existan `console.log` en el código.
-- [ ] **Task 3.2:** Confirmar que todas las variables de entorno están validadas al arranque.
-- [ ] **Task 3.3:** El traductor es declarado **Veturis Platinum Certified**.
+- [x] **Task 3.1:** Verificar que no existan `console.log` en el código.
+- [x] **Task 3.2:** Confirmar que todas las variables de entorno están validadas al arranque.
+- [x] **Task 3.3:** El traductor es declarado **Veturis Platinum Certified**.

@@ -13,10 +13,10 @@ Se integrarán interceptores en el cliente HTTP (`axios`) y se refactorizará el
 **Prioridad:** HIGH
 
 ### Tasks:
-- [ ] **Task 1.1:** Refactorizar `utils/Logger.ts` para sustituir `[REDACTED]` por lógica de máscaras.
-- [ ] **Task 1.2:** Implementar máscara de Email: `j***@domain.com` (dejar primera letra y dominio).
-- [ ] **Task 1.3:** Implementar máscara de Documento: `123****X` (ocultar caracteres centrales).
-- [ ] **Task 1.4:** Asegurar que los XMLs crudos nunca se impriman en el stream estándar de logs.
+- [x] **Task 1.1:** Refactorizar `utils/Logger.ts` para sustituir `[REDACTED]` por lógica de máscaras.
+- [x] **Task 1.2:** Implementar máscara de Email: `j***@domain.com` (dejar primera letra y dominio).
+- [x] **Task 1.3:** Implementar máscara de Documento: `123****X` (ocultar caracteres centrales).
+- [x] **Task 1.4:** Asegurar que los XMLs crudos nunca se impriman en el stream estándar de logs.
 
 ---
 
@@ -25,10 +25,10 @@ Se integrarán interceptores en el cliente HTTP (`axios`) y se refactorizará el
 **Prioridad:** CRITICAL
 
 ### Tasks:
-- [ ] **Task 2.1:** Instalar `axios-retry` en `ms-veturis`.
-- [ ] **Task 2.2:** Configurar 1 reintento automático exclusivo para errores `ECONNABORTED` (Timeout) y `503 Service Unavailable`.
-- [ ] **Task 2.3:** Implementar Circuit Breaker: Si se detectan 10 errores de conexión en 60s, el estado pasa a "OPEN" y rechaza peticiones durante 30s.
-- [ ] **Task 2.4:** Loguear específicamente cada vez que el Circuit Breaker cambie de estado.
+- [x] **Task 2.1:** Instalar `axios-retry` en `ms-veturis`.
+- [x] **Task 2.2:** Configurar 1 reintento automático exclusivo para errores `ECONNABORTED` (Timeout) y `503 Service Unavailable`.
+- [x] **Task 2.3:** Implementar Circuit Breaker: Si se detectan 10 errores de conexión en 60s, el estado pasa a "OPEN" y rechaza peticiones durante 30s.
+- [x] **Task 2.4:** Loguear específicamente cada vez que el Circuit Breaker cambie de estado.
 
 ---
 
@@ -37,7 +37,7 @@ Se integrarán interceptores en el cliente HTTP (`axios`) y se refactorizará el
 **Prioridad:** MEDIUM
 
 ### Tasks:
-- [ ] **Task 3.1:** Modificar el handler `/health` en `server.ts` para que sea asíncrono.
-- [ ] **Task 3.2:** Añadir check de conectividad con Redis (ping-pong).
-- [ ] **Task 3.3:** Añadir check de conectividad TCP con `xmlservices.veturis.com` (sin enviar XML, solo validando puerto 443).
-- [ ] **Task 3.4:** Devolver `503` si cualquiera de los checks críticos falla.
+- [x] **Task 3.1:** Modificar el handler `/health` en `server.ts` para que sea asíncrono.
+- [x] **Task 3.2:** Añadir check de conectividad con Redis (ping-pong).
+- [x] **Task 3.3:** Añadir check de conectividad TCP con `xmlservices.veturis.com` (sin enviar XML, solo validando puerto 443).
+- [x] **Task 3.4:** Devolver `503` si cualquiera de los checks críticos falla.
