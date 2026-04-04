@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lets Go Travel - GDS Integration Suite 🌍
 
-## Getting Started
+Este repositorio contiene la arquitectura centralizada de integración con Proveedores Globales de Distribución (GDS) para **Let's Go Travel**. La solución está diseñada bajo el patrón **Hollow Shell**, garantizando una traducción pura entre protocolos (gRPC/REST) y los servicios nativos de los proveedores (Veturis XML).
 
-First, run the development server:
+## 🏗️ Arquitectura del Sistema
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+El sistema opera mediante un **Modo Dual**:
+1.  **Capa gRPC (Interna):** Puerto `50052`. Diseñada para consumo de alta eficiencia entre microservicios core.
+2.  **Capa REST Bridge (Frontend):** Puerto `3005`. Un puente HTTP diseñado específicamente para la compatibilidad con el frontend en Next.js, permitiendo búsquedas, detalles y reservas sin configuración gRPC en el cliente.
+
+### 🛡️ PII Shield & Seguridad
+Todos los logs transaccionales pasan por un filtro de privacidad que redacta información sensible (nombres, documentos, tarjetas, emails) antes de ser impresos o almacenados.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```text
+lets_go_travel/
+├── microservices/
+│   └── ms-veturis/          # Microservicio Adaptador Veturis
+│       ├── src/
+│       │   ├── api/         # Cliente nativo XML (Axios)
+│       │   ├── services/    # Lógica de traducción Hollow Shell
+│       │   ├── interfaces/  # Contratos gRPC y Esquemas Zod
+│       │   └── etl/         # Ingestión de catálogos estáticos (CSV -> Redis)
+├── app/                     # Frontend Next.js
+│   ├── components/          # UI Modular (HotelCard, Results)
+│   ├── hooks/               # useCentralizer (Puente con microservicios)
+│   └── types/               # Tipado estándar para toda la plataforma
+├── gds-contracts/           # Manuales oficiales y Colecciones Postman
+└── public/                  # Assets estáticos y multimedia
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Instalación y Configuración
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Requisitos Previos
+- **Node.js** v20+
+- **Redis** (ejecutándose en `localhost:6379` para el catálogo de hoteles)
+- **Credenciales Veturis** (XML v3.9)
 
-## Learn More
+### Paso 1: Microservicio ms-veturis
+```bash
+cd microservices/ms-veturis
+npm install
+cp .env.example .env # Configura tus credenciales reales aquí
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Paso 2: Frontend (Next.js)
+```bash
+cd ../../
+npm install
+npm run dev
+```
+El frontend estará disponible en [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Comandos Principales
 
-## Deploy on Vercel
+- `npm run build`: Compilación de TypeScript y verificación de tipos.
+- `npm run gen-proto`: Regenera las interfaces de TypeScript a partir de `provider.proto`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚙️ Configuración Técnica
+- El sistema utiliza **Zod** para la validación de contratos en el Bridge REST.
+- El catálogo de hoteles se actualiza mediante un Job de ETL diario en `EtlJob.ts`.
+- La arquitectura **Hollow Shell** garantiza que el adaptador sea un traductor puro sin lógica de negocio.

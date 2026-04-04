@@ -26,6 +26,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+**/.env
 .env*.local
 
 # vercel
@@ -34,3 +35,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docs & agent
+.agent
+
+# deprecated code
+/deprecated/
+
+# Internal Knowledge, Strategy & Sprints
+LEER_ANTES_DE_EMPEZAR/
+knowledge/
+sprints/
+
+# GDS Contracts & Manuals
+gds-contracts/
+*.pdf
+*.postman_collection.json
+
+# Data, Logs and Databases
+**/data/
+*.csv
+*.log
+*.sqlite

@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+package gds;
+
+service ProviderService {
+  rpc SearchAvailability(SearchRequest) returns (SearchResponse);
+  rpc GetDetails(DetailsRequest) returns (DetailsResponse);
+  rpc Book(BookRequest) returns (BookResponse);
+  rpc Cancel(CancelRequest) returns (CancelResponse);
+  rpc BookingList(BookingListRequest) returns (BookingListResponse);
+  rpc GetVoucher(VoucherRequest) returns (VoucherResponse);
+  rpc Modify(ModifyRequest) returns (ModifyResponse);
+}
+
+message ModifyRequest {
+  string bookingId = 1;
+  string securityCode = 2;
+  repeated Passenger passengers = 3;
+  string remarks = 4;
+}
+
+message ModifyResponse {
+  string status = 1; // 'OK' or 'ERROR'
+  string message = 2;
+}
+
+message Occupancy {
+  int32 adults = 1;
+  int32 children = 2;
+  repeated int32 childrenAges = 3;
+}
+
+message SearchRequest {
+  string hotelId = 1;
+  string checkIn = 2;
+  string checkOut = 3;
+  repeated Occupancy occupancies = 4;
+  string countryCode = 5; 
+  string language = 6;
+}
+
+message SearchResponse {
+  string provider = 1;
+  repeated HotelResult items = 2;
+}
+
+message HotelResult {
+  string hotelId = 1;
+  string hotelName = 2;
+  int32 stars = 3;
+  string imageUrl = 4;
+  double lat = 10;
+  double lng = 11;
+  string roomName = 5;
+  string boardName = 6;
+  string bookingToken = 7;
+  PricingInfo pricing = 8;
+  CancellationPolicy cancellationPolicy = 9;
+  repeated string amenities = 12;
+}
+
+message PricingInfo {
+  double netPrice = 1;
+  double grossPrice = 2;
+  string currency = 3;
+  bool isBindingRate = 4;
+}
+
+message CancellationPolicy {
+  bool refundable = 1;
+  repeated PenaltyTier penaltyTiers = 2;
+  string freeCancellationUntil = 3;
+}
+
+message PenaltyTier {
+  string fromDate = 1;
+  double amount = 2;
+}
+
+message DetailsRequest {
+  string bookingToken = 1;
+}
+
+message DetailsResponse {
+  string status = 1;
+  double price = 2;
+  string currency = 3;
+  string hotelName = 4;
+  string description = 9;
+  string address = 10;
+  string city = 11;
+  CancellationPolicy cancellationPolicy = 5;
+  repeated string essentialInformation = 6;
+  string mandatoryPaxes = 7; // 'Y', 'N', 'H'
+  PriceChangeInfo priceChangeInfo = 8;
+}
+
+message PriceChangeInfo {
+  bool hasChanged = 1;
+  double newPrice = 2;
+}
+
+message BookRequest {
+  string bookingToken = 1;
+  ClientInfo client = 2;
+  repeated Passenger passengers = 3;
+  string remarks = 4;
+  double acceptedPriceChange = 5;
+  CompanyInfo company = 6;
+  string agencyReference = 7;
+}
+
+message CompanyInfo {
+  string name = 1;
+  string cif = 2;
+  string address = 3;
+}
+
+message ClientInfo {
+  string name = 1;
+  string surnames = 2;
+  string email = 3;
+  string phone = 4;
+  string country = 5;
+}
+
+message Passenger {
+  string name = 1;
+  string surname = 2;
+  int32 age = 3;
+  string docNumber = 4;
+  string dateOfBirth = 5; // YYYY-MM-DD
+  string expirationDocumentDate = 6; // YYYY-MM-DD
+}
+
+message BookResponse {
+  string status = 1;
+  string locator = 2;
+  string bookingId = 3;
+  string securityCode = 4;
+}
+
+message CancelRequest {
+  string bookingId = 1;
+  string securityCode = 2;
+  bool confirm = 3;
+}
+
+message CancelResponse {
+  string status = 1;
+  string message = 2;
+  double cancellationPrice = 3;
+  string currency = 4;
+}
+
+message BookingListRequest {
+  string bookingId = 1;
+  string locator = 2;
+  string agencyReference = 3;
+  DateRange dateRange = 4;
+  string bookingStatus = 5;
+}
+
+message DateRange {
+  string fromDate = 1;
+  string toDate = 2;
+  int32 type = 3; // 1=Res, 2=In, 3=Out, 4=Can, 5=DL
+}
+
+message BookingListResponse {
+  repeated BookingSummary bookings = 1;
+}
+
+message BookingSummary {
+  string bookingId = 1;
+  string status = 2;
+  string locator = 3;
+  string hotelName = 4;
+  string checkIn = 5;
+  string checkOut = 6;
+  double price = 7;
+}
+
+message VoucherRequest {
+  string bookingId = 1;
+  string securityCode = 2;
+}
+
+message VoucherResponse {
+  string status = 1;
+  string voucherUrl = 2; // Optional URL or encoded data
+  string rawHtml = 3;
+}
