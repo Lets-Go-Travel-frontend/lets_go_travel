@@ -1,0 +1,761 @@
+{
+  "info": {
+    "_postman_id": "e5963bca-e650-4ee4-bffe-ec18f657d3df",
+    "name": "LetsGoTravel",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8036899",
+    "_collection_link": "https://go.postman.co/collection/8036899-e5963bca-e650-4ee4-bffe-ec18f657d3df?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "ApiHotelDo - flata afiliado",
+      "item": [
+        {
+          "name": "GetQuoteHotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{hotelDo-dev}}/GetQuoteHotels?a={{afiliado}}&c=US&co=AR&sd=20251212&ed=20251216&h=1&r=1&r1a=2",
+              "host": [
+                "{{hotelDo-dev}}"
+              ],
+              "path": [
+                "GetQuoteHotels"
+              ],
+              "query": [
+                {
+                  "key": "a",
+                  "value": "{{afiliado}}"
+                },
+                {
+                  "key": "c",
+                  "value": "US"
+                },
+                {
+                  "key": "co",
+                  "value": "AR"
+                },
+                {
+                  "key": "sd",
+                  "value": "20251212"
+                },
+                {
+                  "key": "ed",
+                  "value": "20251216"
+                },
+                {
+                  "key": "h",
+                  "value": "1"
+                },
+                {
+                  "key": "r",
+                  "value": "1"
+                },
+                {
+                  "key": "r1a",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Veturis XML - OK",
+      "item": [
+        {
+          "name": "Static Data",
+          "item": [
+            {
+              "name": "GetHotelList",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "user",
+                      "value": "TestVeturisXML",
+                      "type": "text",
+                      "id": 0
+                    },
+                    {
+                      "key": "password",
+                      "value": "xmltestveturis",
+                      "type": "text",
+                      "id": 1
+                    },
+                    {
+                      "key": "file",
+                      "value": "SD_HH",
+                      "type": "text",
+                      "id": 2
+                    },
+                    {
+                      "key": "language",
+                      "value": "SPA",
+                      "type": "text",
+                      "id": 3
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://testxmlservices.veturis.com/getStaticData.php",
+                  "protocol": "http",
+                  "host": [
+                    "testxmlservices",
+                    "veturis",
+                    "com"
+                  ],
+                  "path": [
+                    "getStaticData.php"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "SearchAvailability",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "xmlRQ",
+                  "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <SearchAvailabilityRQ version=\"2.0\" language=\"ENG\"> <Request> <HotelList>9553</HotelList> <Check_in_date>2025-12-21</Check_in_date> <Check_out_date>2025-12-25</Check_out_date> <Occupancy> <Rooms>1</Rooms> <Adults>1</Adults> <Children>0</Children> </Occupancy> </Request> </SearchAvailabilityRQ>",
+                  "type": "text",
+                  "id": 0
+                },
+                {
+                  "key": "user",
+                  "value": "TestVeturisXML",
+                  "type": "text",
+                  "id": 1
+                },
+                {
+                  "key": "password",
+                  "value": "xmltestveturis",
+                  "type": "text",
+                  "id": 2
+                },
+                {
+                  "key": "agencyUser",
+                  "value": "XMLTestAlcab",
+                  "type": "text",
+                  "id": 3
+                },
+                {
+                  "key": "agencyPassword",
+                  "value": "MCQnhs05XML",
+                  "type": "text",
+                  "id": 4
+                }
+              ],
+              "options": {
+                "formdata": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{veturisXml-dev}}",
+              "host": [
+                "{{veturisXml-dev}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hotetec - ok",
+      "item": [
+        {
+          "name": "HotelList",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"sessionId\": \"TES#20727#874702003157602\",\r\n    \"languageCode\": \"ES\",\r\n    \"currency\": \"EUR\",\r\n    \"vendorCode\": \"TESTHTT\",\r\n    \"hotelCode\": null,\r\n    \"hotelName\": null,\r\n    \"hotelFacilityCode\": null,\r\n    \"locationCode\": null,\r\n    \"categoryCode\": null,\r\n    \"chainCode\": null,\r\n    \"establishmentTypeCode\": null,\r\n    \"roomCode\": null,\r\n    \"rateCode\": null,\r\n    \"onlyWithRates\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{hotetec-dev}}/listHotels",
+              "host": [
+                "{{hotetec-dev}}"
+              ],
+              "path": [
+                "listHotels"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "opensession",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n   \"clientCode\":\"TES\",\r\n    \"systemCode\": \"TES\",\r\n    \"username\":\"TEST2020\",\r\n    \"password\": \"2020TEST!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{hotetec-dev}}/openSession",
+              "host": [
+                "{{hotetec-dev}}"
+              ],
+              "path": [
+                "openSession"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Abrir Session",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "name": "cache-control",
+                "sortOrder": 2,
+                "infoTitle": "We recommend using this header",
+                "info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+                "allowedToToggle": false,
+                "disableEdit": true,
+                "previewSettingsLink": "Go to settings",
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "postman-token",
+                "sortOrder": 3,
+                "infoTitle": "We recommend using this header",
+                "info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+                "allowedToToggle": false,
+                "disableEdit": true,
+                "previewSettingsLink": "Go to settings",
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "content-type",
+                "sortOrder": 4,
+                "infoTitle": "This header was automatically added",
+                "info": "The Content-Type header is added to help the server identify the media type of the request body that is present in this request.\n\nUse the request body tab to control the value or to remove this header.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "previewSettingsLink": "Go to body",
+                "key": "Content-Type",
+                "value": "application/xml",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "content-length",
+                "sortOrder": 5,
+                "infoTitle": "This header was automatically added",
+                "info": "The Content-Length header was added to indicate to the server the size of the request body that is added to this request. Server uses this value to parse the request body accurately.\n\nYou can remove the header or enter a new one with a different value.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "previewSettingsLink": "Go to body",
+                "key": "Content-Length",
+                "value": "<calculated when request is sent>",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "host",
+                "sortOrder": 6,
+                "infoTitle": "We recommend using this header",
+                "info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "user-agent",
+                "sortOrder": 7,
+                "infoTitle": "We recommend using this header",
+                "info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "accept",
+                "sortOrder": 8,
+                "infoTitle": "We recommend using this header",
+                "info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Accept",
+                "value": "*/*",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "accept-encoding",
+                "sortOrder": 9,
+                "infoTitle": "We recommend using this header",
+                "info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "connection",
+                "sortOrder": 10,
+                "infoTitle": "We recommend using this header",
+                "info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Connection",
+                "value": "keep-alive",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "key": "USER",
+                "value": "ALCABXML",
+                "type": "text",
+                "id": 0,
+                "disabled": true
+              },
+              {
+                "key": "PASS",
+                "value": "ALCABXML",
+                "type": "text",
+                "id": 1,
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<SesionAbrirPeticion>\r\n<codsys>TES</codsys>\r\n<codage>TES</codage>\r\n<idtusu>TEST2020</idtusu>\r\n<pasusu>2020TEST!</pasusu>\r\n<codidi>ES</codidi>\r\n</SesionAbrirPeticion>",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://xml.hotetec.com/publisher/xmlservice.srv",
+              "protocol": "https",
+              "host": [
+                "xml",
+                "hotetec",
+                "com"
+              ],
+              "path": [
+                "publisher",
+                "xmlservice.srv"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "URL: [https://xml.hotetec.com/publisher/xmlservice.srv](http://xml.hotetec.com/publisher/xmlservice.srv)  \nUSER: **ALCABXML**  \nPASS: \\*_ALCABXML__\\*_\n\nCodigo del hotel de pruebas: 52768  \ncodage (codigo de agencia): ACS\n\ncodsys (codigo del sistema): XML\n\ncodtou (codigo touroperador) : HTI\n\ncoszge (codigo de zona): ES-46393"
+    },
+    {
+      "name": "europamundo - ok",
+      "item": [
+        {
+          "name": "getPaisesAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{europamundo-dev}}/getPaisesAll?userName=ALCABSERVICEWS&userPassword=4lc4bS3rv",
+              "host": [
+                "{{europamundo-dev}}"
+              ],
+              "path": [
+                "getPaisesAll"
+              ],
+              "query": [
+                {
+                  "key": "userName",
+                  "value": "ALCABSERVICEWS"
+                },
+                {
+                  "key": "userPassword",
+                  "value": "4lc4bS3rv"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getViajes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{europamundo-dev}}/getViajes?userName=ALCABSERVICEWS&userPassword=4lc4bS3rv",
+              "host": [
+                "{{europamundo-dev}}"
+              ],
+              "path": [
+                "getViajes"
+              ],
+              "query": [
+                {
+                  "key": "userName",
+                  "value": "ALCABSERVICEWS",
+                  "type": "text",
+                  "id": 0
+                },
+                {
+                  "key": "userPassword",
+                  "value": "4lc4bS3rv",
+                  "type": "text",
+                  "id": 1
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getHotelesViaje",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{europamundo-dev}}/getHotelesViaje?userName=ALCABSERVICEWS&userPassword=4lc4bS3rv",
+              "host": [
+                "{{europamundo-dev}}"
+              ],
+              "path": [
+                "getHotelesViaje"
+              ],
+              "query": [
+                {
+                  "key": "userName",
+                  "value": "ALCABSERVICEWS",
+                  "type": "text",
+                  "id": 0
+                },
+                {
+                  "key": "userPassword",
+                  "value": "4lc4bS3rv",
+                  "type": "text",
+                  "id": 1
+                },
+                {
+                  "key": "idViaje",
+                  "value": "27702",
+                  "type": "text",
+                  "id": 2,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getViajes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{europamundo-dev}}/getViajes?userName=ALCABSERVICEWS&userPassword=4lc4bS3rv",
+              "host": [
+                "{{europamundo-dev}}"
+              ],
+              "path": [
+                "getViajes"
+              ],
+              "query": [
+                {
+                  "key": "userName",
+                  "value": "ALCABSERVICEWS",
+                  "type": "text",
+                  "id": 0
+                },
+                {
+                  "key": "userPassword",
+                  "value": "4lc4bS3rv",
+                  "type": "text",
+                  "id": 1
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TechnoHeaven",
+      "item": [
+        {
+          "name": "Authenticate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "[https://online.travelcompositor.com/api/documentation/index.xhtml#ApiAccomodation](https://online.travelcompositor.com/api/documentation/index.xhtml#ApiAccomodation)"
+    },
+    {
+      "name": "Civitatis V2",
+      "item": [
+        {
+          "name": "Authentication",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"leonardNimoy\",\r\n  \"password\": \"koolinar\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{civitatis-dev}}/auth",
+              "host": [
+                "{{civitatis-dev}}"
+              ],
+              "path": [
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "[https://api.civitatis.com/docs/es/v2](https://api.civitatis.com/docs/es/v2)"
+    },
+    {
+      "name": "TravelCompositor",
+      "item": [
+        {
+          "name": "Authenticate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"Alcab\",\r\n    \"password\": \"Maydy(1987)$\",\r\n    \"micrositeId\": \r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{travelcompositor-dev}}/authentication/authenticate",
+              "host": [
+                "{{travelcompositor-dev}}"
+              ],
+              "path": [
+                "authentication",
+                "authenticate"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "RestelHotel",
+      "item": [
+        {
+          "name": "getHotels",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<peticion>\r\n    <tipo>15</tipo>\r\n    <nombre>Servicio de información de hotel</nombre>\r\n    <agencia>Agencia prueba</agencia>\r\n    <parametros>\r\n        <codigo>745388</codigo>\r\n        <idioma>2</idioma>\r\n    </parametros>\r\n</peticion>",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "xml.hotelresb2b.com/xml/listen_xml.jsp?codigousu=KFTY&clausu=xml524255&secacc=160201&afiliation=RS",
+              "host": [
+                "xml",
+                "hotelresb2b",
+                "com"
+              ],
+              "path": [
+                "xml",
+                "listen_xml.jsp"
+              ],
+              "query": [
+                {
+                  "key": "codigousu",
+                  "value": "KFTY",
+                  "type": "text",
+                  "id": 0
+                },
+                {
+                  "key": "clausu",
+                  "value": "xml524255",
+                  "type": "text",
+                  "id": 1
+                },
+                {
+                  "key": "secacc",
+                  "value": "160201",
+                  "type": "text",
+                  "id": 2
+                },
+                {
+                  "key": "afiliation",
+                  "value": "RS",
+                  "type": "text",
+                  "id": 3
+                },
+                {
+                  "key": "xml",
+                  "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><peticion>   <tipo>15</tipo>   <nombre>Servicio de información de hotel</nombre>   <agencia>Agencia prueba</agencia>   <parametros>      <codigo>745388</codigo>      <idioma>2</idioma>   </parametros></peticion>",
+                  "type": "text",
+                  "id": 4,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HotelBeds",
+      "item": [
+        {
+          "name": "getHotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "hotelDo-dev",
+      "value": "https://api-dev.bestday.net/AffiliateService/v2.0/AffiliateService.svc/restful",
+      "type": "string"
+    },
+    {
+      "key": "hotelDo-prod",
+      "value": "https://api.bestday.net/AffiliateService/v2.0/AffiliateService.svc/res\n tful",
+      "type": "string"
+    },
+    {
+      "key": "veturisXml-dev",
+      "value": "http://testxmlservices.veturis.com/xmlWebServices.php",
+      "type": "string"
+    },
+    {
+      "key": "veturisXml-prod",
+      "value": "https://xmlservices.veturis.com/xmlWebServices.php",
+      "type": "string"
+    },
+    {
+      "key": "europamundo-dev",
+      "value": "http://desarrollo.selfip.com/webserv/ServiceDatos.asmx",
+      "type": "string"
+    },
+    {
+      "key": "europamundo-prod",
+      "value": "https://www.europamundo-online.com/webserv/ServiceDatos.asmx\n",
+      "type": "string"
+    },
+    {
+      "key": "travelcompositor-dev",
+      "value": "https://online.travelcompositor.com/resourses",
+      "type": "string"
+    },
+    {
+      "key": "civitatis-dev",
+      "value": "https://api-qa.civitatis.com/v2",
+      "type": "string"
+    },
+    {
+      "key": "civitatis-prod",
+      "value": "https://api.civitatis.com/v2",
+      "type": "string"
+    },
+    {
+      "key": "travelcompositor-prod",
+      "value": "https://online.travelcompositor.com/resourses",
+      "type": "string"
+    },
+    {
+      "key": "restel-dev",
+      "value": "xml.hotelresb2b.com/xml/listen_xml.jsp",
+      "type": "string"
+    },
+    {
+      "key": "hotetec-dev",
+      "value": "https://hotel.new.hotetec.com/webservice/integrations/pull",
+      "type": "string"
+    },
+    {
+      "key": "hotelbeds-dev",
+      "value": "https://api.test.hotelbeds.com/hotel-api/1.0/status",
+      "type": "string"
+    }
+  ]
+}
