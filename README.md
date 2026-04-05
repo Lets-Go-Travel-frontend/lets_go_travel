@@ -8,10 +8,31 @@ El sistema opera mediante un **Modo Dual**:
 1.  **Capa gRPC (Interna):** Puerto `50052`. Diseñada para consumo de alta eficiencia entre microservicios core.
 2.  **Capa REST Bridge (Frontend):** Puerto `3005`. Un puente HTTP diseñado específicamente para la compatibilidad con el frontend en Next.js, permitiendo búsquedas, detalles y reservas sin configuración gRPC en el cliente.
 
-### 🛡️ PII Shield & Seguridad
-Todos los logs transaccionales pasan por un filtro de privacidad que redacta información sensible (nombres, documentos, tarjetas, emails) antes de ser impresos o almacenados.
+## 🛠️ Validación de Funcionalidades (Demo Mode)
+
+Si no dispones de una **IP Autorizada** por el GDS Veturis, el sistema entrará automáticamente en **Modo Demo**. Puedes probar el flujo de datos completo (Búsqueda, Detalles, Reserva y Anulación) en:
+
+👉 [http://localhost:3000/veturis-demo](http://localhost:3000/veturis-demo)
 
 ---
+
+## 🧪 Suite de Pruebas
+
+Para garantizar la estabilidad de los protocolos y el cumplimiento de la **Zero-Any Law**, ejecuta las pruebas unitarias e integrales:
+
+```bash
+# Dentro de microservices/ms-veturis
+npm run test
+```
+
+### Comprobación de integridad GDS
+- **Health Check:** `npx ts-node tests/healthCheck.ts`
+- **Catalog Ingestion:** `npx ts-node src/cron/EtlJob.ts` (Carga del CSV a Redis)
+
+---
+
+## 🛡️ Contratación e Integridad
+Este proyecto está 100% certificado bajo la arquitectura **Hollow Shell** y el manual **Veturis v3.9**. No se permite lógica de negocio fuera de los servicios centralizadores.
 
 ## 📂 Estructura del Proyecto
 
