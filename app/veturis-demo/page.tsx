@@ -210,7 +210,6 @@ export default function VeturisDemoPage() {
 
   const stepLabels = ['Catálogo', 'Disponibilidad', 'Validación', 'Reserva', 'Voucher'];
 
-  const nights = Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000);
 
   return (
     <div className="min-h-screen bg-[#0a0a12] text-neutral-100 p-4 md:p-8 font-sans">
