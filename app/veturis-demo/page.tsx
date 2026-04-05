@@ -32,10 +32,28 @@ export default function VeturisDemoPage() {
   // Search params
   const [query, setQuery] = useState('madrid');
   const [checkIn, setCheckIn] = useState(() => { const d = new Date(); d.setDate(d.getDate() + 10); return d.toISOString().split('T')[0]; });
+  const [nights, setNights] = useState(5);
   const [checkOut, setCheckOut] = useState(() => { const d = new Date(); d.setDate(d.getDate() + 15); return d.toISOString().split('T')[0]; });
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
+
+  // ── Sync checkOut with nights ──────────────────────────
+  const syncCheckOut = (inDate: string, n: number) => {
+    const d = new Date(inDate);
+    d.setDate(d.getDate() + n);
+    setCheckOut(d.toISOString().split('T')[0]);
+  };
+
+  const handleNightsChange = (n: number) => {
+    setNights(n);
+    syncCheckOut(checkIn, n);
+  };
+
+  const handleCheckInChange = (date: string) => {
+    setCheckIn(date);
+    syncCheckOut(date, nights);
+  };
 
   // State
   const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -285,13 +303,15 @@ export default function VeturisDemoPage() {
                   </div>
                   <div>
                     <label className="block text-xs text-neutral-500 mb-1">Check-in</label>
-                    <input type="date" value={checkIn} onChange={e => setCheckIn(e.target.value)}
+                    <input type="date" value={checkIn} onChange={e => handleCheckInChange(e.target.value)}
                       className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white" />
                   </div>
                   <div>
-                    <label className="block text-xs text-neutral-500 mb-1">Check-out</label>
-                    <input type="date" value={checkOut} onChange={e => setCheckOut(e.target.value)}
-                      className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white" />
+                    <label className="block text-xs text-neutral-500 mb-1">Noches</label>
+                    <select value={nights} onChange={e => handleNightsChange(Number(e.target.value))}
+                      className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white">
+                      {[...Array(30)].map((_, i) => <option key={i+1} value={i+1}>{i+1} noche{i > 0 ? 's' : ''}</option>)}
+                    </select>
                   </div>
                 </div>
 
