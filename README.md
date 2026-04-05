@@ -58,8 +58,8 @@ lets_go_travel/
 ## 🚀 Instalación y Configuración
 
 ### Requisitos Previos
-- **Node.js** v20+
-- **Redis** (ejecutándose en `localhost:6379` para el catálogo de hoteles)
+- **Node.js** v22.x (v20.x+ recomendado, mínimo v18.x)
+- **Redis** con módulo **RediSearch** (Puerto `6379`)
 - **Credenciales Veturis** (XML v3.9)
 
 ### Paso 1: Microservicio ms-veturis
