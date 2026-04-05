@@ -1,68 +1,61 @@
 # ms-veturis: El Adaptador GDS "Hollow Shell" 🏦
 
-Este microservicio es el encargado de comunicar la arquitectura centralizada de **Let's Go Travel** con el GDS **Veturis**, cumpliendo estrictamente con el manual **XML v3.9**.
+Microservicio encargado de comunicar **Let's Go Travel** con el GDS **Veturis** (XML v3.9). Implementa una arquitectura stateless con fallback de mocks inteligentes para desarrollo.
 
-## 🚀 Instalación y Despliegue
+---
 
+## 🚀 Guía de Inicio Rápido (Setup)
+
+### 1. Requisitos Previos
+- **Node.js** v18+
+- **Redis** con módulo **RediSearch** activo.
+
+### 2. Despliegue de Redis (Opciones)
+- **Docker (Recomendado):** `docker run -d --name redis-lgt -p 6379:6379 redis/redis-stack-server:latest`
+- **Nativo (Linux/WSL2):** Instalar `redis-server` y habilitar `redis-stack` para soporte de módulos de búsqueda.
+
+### 3. Instalación
 ```bash
 cd microservices/ms-veturis
 npm install
-cp .env.example .env # Completa con tus credenciales
+```
+
+### 4. Configuración (.env)
+Configurar archivo `.env` basado en `.env.example`.
+- `VETURIS_USER/PASSWORD` requeridos para entorno real.
+- `REDIS_URL` para catálogo y búsqueda (ej: `redis://localhost:6379`).
+- `VETURIS_URL`: Endpoint XML de Veturis.
+
+### 5. Ingestión Inicial de Datos (CSV -> Redis)
+```bash
+npx ts-node src/cron/EtlJob.ts
+```
+> Nota: Procesa `data/veturis_hotels.csv`, crea el índice `idx:veturis_hotels` y mapea los detalles de los hoteles.
+
+### 6. Ejecución
+```bash
 npm run dev
 ```
+- **Bridge REST:** `http://localhost:3005`
+- **gRPC Server:** `localhost:50052`
 
 ---
 
-## 🏗️ Puntos de Entrada (Endpoints)
+## 🧪 Validación y Pruebas
+Dado que el **Centralizer** final se encuentra en desarrollo, este microservicio dispone de una suite de pruebas para validar el flujo completo de datos y la integridad de las respuestas:
 
-### 🌉 Bridge REST (Puerto 3005)
-Ideal para consumo desde el frontend (Next.js):
-- `POST /search`: Búsqueda de disponibilidad dinámica.
-- `POST /details`: Información extendida, precios actualizados y políticas de cancelación.
-- `POST /book`: Confirmación de reserva.
-- `POST /cancel`: Cotización y confirmación de anulación.
-- `POST /booking-list`: Listado histórico de reservas.
-- `POST /voucher`: Obtención del bono de servicio (HTML/PDF).
-
-### 🚀 gRPC (Puerto 50052)
-Ideal para consumo desde microservicios internos:
-- `ProviderService/SearchAvailability`
-- `ProviderService/GetDetails`
-- `ProviderService/Book`
-- `ProviderService/Cancel`
-- `ProviderService/BookingList`
+- **Suite de Pruebas:** `npm run test` (Valida mappers e integridad de datos).
+- **Prototipo E2E:** Consultar `/veturis-demo` para validación visual del flujo completo.
+- **Validación Manual:** `npx ts-node tests/healthCheck.ts` para verificar conectividad Bridge/Redis.
 
 ---
 
-## 🛠️ Ingestión de Datos (ETL)
-
-El microservicio no almacena datos de reservas, pero gestiona un catálogo estático de hoteles, destinos y amenidades para mejorar el rendimiento del frontend.
-
-**Comando de Ingestión Manual:**
-```bash
-# Inyecta el CSV de hoteles de Veturis en Redis
-ts-node src/cron/EtlJob.ts
-```
-Este proceso ocurre automáticamente todos los días a las **02:00 AM UTC** mediante `node-cron`.
+## 🤖 Mock Engine Inteligente
+Si el GDS devuelve `403 Forbidden` (bloqueo de IP) o `Timeout`, el sistema activa un **Fallback de Mocks** que permite probar el flujo completo (End-to-End) hasta la reserva y anulación sin impacto real en el proveedor.
 
 ---
 
-## 🔒 Variables de Entorno (.env)
-
-| Variable | Descripción |
-| :--- | :--- |
-| `VETURIS_USER` | Usuario XML proporcionado por Veturis. |
-| `VETURIS_PASSWORD` | Password XML proporcionado por Veturis. |
-| `BRIDGE_API_KEY` | Clave secreta para autorizar peticiones al Bridge REST. |
-| `REDIS_URL` | URL de conexión a Redis (ej: `redis://localhost:6379`). |
-
----
-
-## 🛡️ Anti-Any Law Compliance
-Este microservicio implementa una política de **Zero Any**. La lógica de traducción y mappers utiliza interfaces estrictas para garantizar la integridad de los datos.
-
-## 🧪 Validación de Integridad
-Para ejecutar la suite de pruebas técnicas:
-```bash
-npm run test
-```
+## 🛡️ Estándares del Proyecto
+- **Zero-Any Law:** Prohibido el uso de `any`. Estricto cumplimiento en `src/interfaces`.
+- **PII Shield:** Redacción automática de datos sensibles en logs.
+- **Hollow Shell:** Traducción de protocolos sin lógica de negocio agregada.

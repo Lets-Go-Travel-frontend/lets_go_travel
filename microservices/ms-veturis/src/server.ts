@@ -144,6 +144,22 @@ const startRestBridge = () => {
         }
 
         // --- RUTA GET CATALOGO (SIN BODY) ---
+        if (req.url?.startsWith('/hotels/search') && req.method === 'GET') {
+            try {
+                const url = new URL(req.url, `http://${req.headers.host}`);
+                const query = url.searchParams.get('q') || '';
+                const page = parseInt(url.searchParams.get('page') || '1');
+                const limit = parseInt(url.searchParams.get('limit') || '20');
+                const data = await vetService.searchHotels(query, page, limit);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(data));
+            } catch (err: any) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'CATALOG_SEARCH_ERROR', message: err.message }));
+            }
+            return;
+        }
+
         if (req.url?.startsWith('/hotels') && req.method === 'GET') {
             try {
                 const url = new URL(req.url, `http://${req.headers.host}`);

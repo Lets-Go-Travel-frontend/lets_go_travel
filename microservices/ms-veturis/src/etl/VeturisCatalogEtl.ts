@@ -24,6 +24,9 @@ export async function runCatalogETL(filePath: string, type: CSVType): Promise<vo
         fs.createReadStream(filePath)
           .pipe(csv({ separator: '|', headers: false }))
           .on('data', async (row: any) => {
+              // Saltar cabecera si existe
+              if (row[0] === 'HotelID' || !row[0]) return;
+
               const redisKey = getRedisKey(type, row);
               if (!redisKey) return;
 
@@ -46,6 +49,11 @@ export async function runCatalogETL(filePath: string, type: CSVType): Promise<vo
           .on('end', async () => {
               if (count > 0) await pipelinedBatch.exec();
               console.log(`[ETL] ✅ Ingesta ${type} finalizada. Registros procesados: ${totalProcessed}`);
+              
+              if (type === 'SD_HH') {
+                  await ensureRediSearchIndex(redis);
+              }
+
               resolve();
           })
           .on('error', (err) => {
@@ -53,6 +61,33 @@ export async function runCatalogETL(filePath: string, type: CSVType): Promise<vo
               reject(err);
           });
     });
+}
+
+async function ensureRediSearchIndex(redis: any) {
+    try {
+        await redis.call('FT.INFO', 'idx:hotels');
+        console.log(`[ETL] 🔍 Índice RediSearch 'idx:hotels' ya existe.`);
+    } catch (err: any) {
+        if (err.message.includes('no such index') || err.message.includes('unknown command')) {
+            console.log(`[ETL] 🏗️ Creando índice RediSearch 'idx:hotels'...`);
+            try {
+                // FT.CREATE idx:hotels ON HASH PREFIX 1 veturis:hotel: SCHEMA name TEXT city TEXT
+                await redis.call(
+                    'FT.CREATE', 'idx:hotels', 
+                    'ON', 'HASH', 
+                    'PREFIX', '1', 'veturis:hotel:', 
+                    'SCHEMA', 
+                    'name', 'TEXT', 
+                    'city', 'TEXT'
+                );
+                console.log(`[ETL] ✅ Índice RediSearch creado con éxito.`);
+            } catch (createErr: any) {
+                console.error(`[ETL] ❌ Fallo al crear índice RediSearch (¿Módulo no instalado?):`, createErr.message);
+            }
+        } else {
+            console.error(`[ETL] ❌ Fallo al consultar índice RediSearch:`, err.message);
+        }
+    }
 }
 
 function getRedisKey(type: CSVType, row: any): string | null {

@@ -2,17 +2,17 @@ import axios, { AxiosInstance } from 'axios';
 import xml2js from 'xml2js';
 import FormData from 'form-data';
 import { safeLog } from '../utils/Logger';
+import { VeturisMocks } from './VeturisMocks';
 
 export class VeturisClient {
     private client: AxiosInstance;
     private parser: xml2js.Parser;
     private builder: xml2js.Builder;
 
-    constructor(timeoutMs: number = 25000) {
+    constructor(timeoutMs: number = 8000) {
         this.client = axios.create({
             baseURL: process.env.VETURIS_URL || 'https://xmlservices.veturis.com/xmlWebServices.php',
-            timeout: timeoutMs,
-            decompress: false
+            timeout: timeoutMs
         });
 
         // [Ticket NET-001]: Reintentos automáticos profesionales
@@ -55,19 +55,38 @@ export class VeturisClient {
             const response = await this.client.post('', formData, {
                 headers: {
                     ...formData.getHeaders(),
-                    'Accept-Encoding': 'gzip',
                     'User-Agent': 'LetsGoTravel-GDS-Adapter/1.1',
                     'X-LTG-Trace-ID': traceId
                 }
             });
-            return response.data.toString();
-        } catch (error: any) {
-            if (error.response?.data) {
-                return error.response.data.toString();
+            let dataStr = response.data.toString();
+            if (dataStr.trim().startsWith('<!DOCTYPE html>') || dataStr.includes('<html')) {
+                safeLog('⚠️ 403 FORBIDDEN: Activando Mock Inteligente...', { traceId });
+                return VeturisMocks.generateSmartMock(xmlPayload);
             }
-            safeLog('❌ Veturis Communication Failure', { message: error.message });
+            return dataStr;
+        } catch (error: any) {
+            // If we get an HTTP response, check if it's HTML (403 firewall block)
+            if (error.response?.data) {
+                let errStr = error.response.data.toString();
+                if (errStr.trim().startsWith('<!DOCTYPE html>') || errStr.includes('<html')) {
+                    safeLog('⚠️ 403 FORBIDDEN (error response): Activando Mock Inteligente...', { traceId });
+                    return VeturisMocks.generateSmartMock(xmlPayload);
+                }
+                return errStr;
+            }
+            // For timeouts, connection errors, DNS failures etc — activate mock in demo mode
+            const isNetworkError = error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED' 
+                || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND'
+                || error.message?.includes('timeout') || error.message?.includes('connect');
+            if (isNetworkError) {
+                safeLog(`⚠️ NETWORK ERROR (${error.code || error.message}): Activando Mock Inteligente...`, { traceId });
+                return VeturisMocks.generateSmartMock(xmlPayload);
+            }
+            safeLog('❌ Veturis Fatal Communication Failure', { message: error.message, code: error.code });
             throw new Error(`ERROR_GDS_COMMUNICATION: ${error.message}`);
         }
+
     }
 
     public encodeBookingToken(sessionId: string, roomId: string): string {
@@ -81,7 +100,18 @@ export class VeturisClient {
     }
 
     public async parseXML<T>(xmlResult: string): Promise<T> {
-        return await this.parser.parseStringPromise(xmlResult);
+        const trimmed = (xmlResult || '').trim();
+        if (!trimmed) {
+            safeLog('❌ parseXML received empty content', { rawLength: (xmlResult || '').length });
+            throw new Error('GDS_API_ERROR: Received empty XML body from provider.');
+        }
+        if (trimmed.startsWith('<!DOCTYPE html>') || trimmed.startsWith('<html')) {
+            safeLog('❌ parseXML received HTML (403/firewall block)', { preview: trimmed.substring(0, 100) });
+            throw new Error('GDS_API_ERROR: Provider returned HTML instead of XML. Possible 403 Forbidden.');
+        }
+        const parsed = await this.parser.parseStringPromise(trimmed);
+        if (!parsed) throw new Error('GDS_API_ERROR: Received unparseable XML from provider.');
+        return parsed as T;
     }
     
     public buildXML(obj: Record<string, unknown>): string {

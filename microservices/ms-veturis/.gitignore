@@ -1,4 +1,15 @@
 node_modules/
 dist/
 .env
+.env.*
+!.env.example
 *.log
+*.pdf
+.vscode/
+.idea/
+tmp/
+*.tmp
+veturis_raw.html
+temp*.*
+test*.*
+build/

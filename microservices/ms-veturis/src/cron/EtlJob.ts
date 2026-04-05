@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import path from 'path';
+import fs from 'fs';
 import { runCatalogETL } from '../etl/VeturisCatalogEtl';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -15,7 +16,10 @@ console.log(`[node-cron] ⏰ Suscribiendo Job de Ingestión Veturis -> Schedule:
 cron.schedule(cronSchedule, async () => {
     console.log('[node-cron] 🚨 02:00 AM UTC - Despertando Job de Ingestión del SFTP...');
     try {
-        const csvPath = path.resolve(__dirname, '../../data/veturis_hotels.csv');
+        const spaPath = path.resolve(__dirname, '../../data/SPA_Hotels.csv');
+        const legacyPath = path.resolve(__dirname, '../../data/veturis_hotels.csv');
+        const csvPath = fs.existsSync(spaPath) ? spaPath : legacyPath;
+
         await runCatalogETL(csvPath, 'SD_HH');
         console.log('[node-cron] ✅ Job Terminado con Éxito. Redis al día.');
     } catch (err) {
@@ -28,7 +32,10 @@ cron.schedule(cronSchedule, async () => {
 // Run immediately for local dev verification if launched via `ts-node src/cron/EtlJob.ts`
 if (require.main === module) {
     console.log('[Dev] 🛠️ Forzando ejecución inmediata de ETL en entorno local para testing...');
-    const csvPath = path.resolve(__dirname, '../../data/veturis_hotels.csv');
+    const spaPath = path.resolve(__dirname, '../../data/SPA_Hotels.csv');
+    const legacyPath = path.resolve(__dirname, '../../data/veturis_hotels.csv');
+    const csvPath = fs.existsSync(spaPath) ? spaPath : legacyPath;
+
     runCatalogETL(csvPath, 'SD_HH')
         .then(() => process.exit(0))
         .catch(() => process.exit(1));
